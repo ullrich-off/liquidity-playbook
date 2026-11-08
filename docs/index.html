@@ -1,0 +1,1236 @@
+<!doctype html><html lang="en"><head><meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1,viewport-fit=cover"></head><body style="margin:0"><title>Liquidity Playbook</title>
+<meta name="claude:viewport-fit-sides" content="cover">
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Bricolage+Grotesque:opsz,wght@12..96,500;12..96,700;12..96,800&family=IBM+Plex+Mono:wght@400;500&family=IBM+Plex+Sans:wght@400;500;600&display=swap" rel="stylesheet">
+<style>
+/* Layout: fixed ink sidebar + wide reading column; every concept gets a full-width chart */
+:root{
+  color-scheme:dark;
+  --bg:#000000; --panel:#0D0D0D; --panel2:#1A1A1A; --ink:#FFFFFF; --ink2:#D4D4D4; --mute:#8C8C8C; --line:#2E2E2E;
+  --side:#000000; --side-ink:#FFFFFF; --side-mute:#8C8C8C; --side-line:#2E2E2E;
+  --liq:#FF9800; --liq-ink:#FFB74D; --blue:#5B8DFF; --good:#26A69A; --bad:#F7525F;
+  --cup:#FFFFFF; --cdn:#7A7A7A;
+  --f-display:'Bricolage Grotesque','Segoe UI',system-ui,sans-serif;
+  --f-body:'IBM Plex Sans','Segoe UI',system-ui,sans-serif;
+  --f-mono:'IBM Plex Mono',ui-monospace,Consolas,monospace;
+}
+*{box-sizing:border-box}
+html{scroll-behavior:smooth}
+body{background:var(--bg);color:var(--ink);font:400 17px/1.7 var(--f-body);margin:0;-webkit-font-smoothing:antialiased}
+a{color:var(--blue)}
+:focus-visible{outline:2px solid #fff;outline-offset:2px;border-radius:4px}
+button{font:inherit;color:inherit;cursor:pointer}
+
+#side{position:fixed;inset:0 auto 0 0;width:310px;background:var(--side);color:var(--side-ink);display:flex;flex-direction:column;z-index:30;border-right:1px solid var(--side-line)}
+.brand{padding:26px 24px 18px;border-bottom:1px solid var(--side-line)}
+.brand b{font:800 25px/1 var(--f-display);letter-spacing:-.02em;display:block}
+.brand b i{font-style:normal;color:var(--mute)}
+.brand span{display:block;margin-top:8px;font:400 12px/1.4 var(--f-mono);color:var(--side-mute);letter-spacing:.02em}
+.prog{padding:16px 24px;border-bottom:1px solid var(--side-line);display:flex;gap:14px;align-items:center}
+.prog svg{flex:none}
+.prog div{font:400 12px/1.45 var(--f-mono);color:var(--side-mute)}
+.prog strong{display:block;font:600 15px/1.2 var(--f-body);color:var(--side-ink)}
+#nav{flex:1;overflow-y:auto;padding:10px 12px 20px;scrollbar-width:thin;scrollbar-color:var(--side-line) transparent}
+.nav-part{font:500 11px/1 var(--f-mono);letter-spacing:.14em;text-transform:uppercase;color:var(--side-mute);padding:20px 12px 8px}
+.nav-i{display:flex;gap:11px;align-items:center;width:100%;text-align:left;background:none;border:0;padding:9px 12px;border-radius:8px;color:var(--side-ink);font:500 14.5px/1.3 var(--f-body)}
+.nav-i:hover{background:var(--side-line)}
+.nav-i[aria-current=page]{background:#fff;color:#000}
+.nav-i .no{flex:none;width:26px;height:26px;border-radius:50%;border:1.5px solid var(--side-mute);display:grid;place-items:center;font:500 11px/1 var(--f-mono);color:var(--side-mute)}
+.nav-i[aria-current=page] .no{border-color:#000;color:#000}
+.nav-i.done .no{background:#fff;border-color:#fff;color:#000}
+.side-foot{padding:14px 24px;border-top:1px solid var(--side-line);display:flex;justify-content:space-between;align-items:center;font:400 12px var(--f-mono);color:var(--side-mute)}
+.side-foot button{background:none;border:1px solid var(--side-line);color:var(--side-ink);border-radius:20px;padding:5px 12px;font:500 12px var(--f-mono)}
+#burger{display:none}
+
+#main{margin-left:310px;min-height:100vh}
+.page{max-width:none;margin:0;padding-block:56px 90px;padding-left:max(clamp(24px,3.2vw,72px),env(safe-area-inset-left,0px));padding-right:max(clamp(24px,3.2vw,72px),env(safe-area-inset-right,0px))}
+.eyebrow{font:500 12px/1 var(--f-mono);letter-spacing:.14em;text-transform:uppercase;color:var(--mute)}
+h1{font:800 clamp(34px,4.4vw,56px)/1.04 var(--f-display);letter-spacing:-.025em;margin:14px 0 18px;text-wrap:balance}
+h2{font:700 29px/1.15 var(--f-display);letter-spacing:-.015em;margin:60px 0 14px;text-wrap:balance}
+h3{font:700 19px/1.3 var(--f-display);margin:34px 0 8px}
+p{margin:0 0 16px;max-width:110ch}
+.lead{font-size:20px;line-height:1.6;color:var(--ink2);max-width:66ch}
+ul,ol{max-width:110ch;padding-left:22px;margin:0 0 18px}
+li{margin:6px 0}
+strong{font-weight:600}
+code,.mono{font-family:var(--f-mono);font-size:.88em;background:var(--panel2);padding:1px 6px;border-radius:5px}
+.chips{display:flex;flex-wrap:wrap;gap:8px;margin:0 0 26px}
+.chip{font:500 12px/1 var(--f-mono);padding:7px 11px;border:1px solid var(--line);border-radius:20px;color:var(--ink2);background:var(--panel)}
+.goals{background:var(--panel);border:1px solid var(--line);border-radius:14px;padding:22px 26px;margin:6px 0 10px}
+.goals h4{margin:0 0 8px;font:500 12px/1 var(--f-mono);letter-spacing:.14em;text-transform:uppercase;color:var(--mute)}
+.goals ul{margin:0}
+
+.box{border-radius:12px;padding:16px 20px 6px;margin:22px 0;background:var(--panel);border:1px solid var(--line);max-width:none}
+.box>b:first-child{display:inline-block;font:500 11px/1 var(--f-mono);letter-spacing:.14em;text-transform:uppercase;padding:5px 9px;border-radius:5px;margin-bottom:10px}
+.box.key{background:var(--panel2);border-color:#8C8C8C}
+.box.key>b:first-child{background:#fff;color:#000}
+.box.warn{background:var(--panel);border-color:#8C8C8C;border-style:dashed}
+.box.warn>b:first-child{background:transparent;color:#fff;border:1px solid #fff}
+.box.tip{background:var(--panel);border-color:var(--line)}
+.box.tip>b:first-child{background:#3A3A3A;color:#fff}
+.box.def>b:first-child{background:var(--ink);color:var(--bg)}
+
+.fig{margin:30px 0;background:var(--panel);border:1px solid var(--line);border-radius:14px;overflow:hidden}
+.fig-h{display:flex;justify-content:space-between;gap:12px;padding:12px 18px;border-bottom:1px solid var(--line);font:500 11.5px/1.2 var(--f-mono);letter-spacing:.08em;text-transform:uppercase;color:var(--mute)}
+.fig-b{padding:10px 12px 4px;overflow-x:auto}
+.fig-b svg{display:block;width:100%;height:auto;min-width:560px}
+.fig-c{padding:10px 18px 16px;font-size:14.5px;line-height:1.55;color:var(--ink2)}
+.row2{display:grid;grid-template-columns:1fr 1fr;gap:0}
+.row2>.fig-b+.fig-b{border-left:1px solid var(--line)}
+.row2 .fig-b svg{min-width:300px}
+.row2 .sub{padding:10px 14px 0;font:500 11px/1.2 var(--f-mono);letter-spacing:.08em;text-transform:uppercase;color:var(--ink2)}
+
+svg text{font-family:var(--f-mono);font-size:11px;fill:var(--ink2)}
+svg .halo{paint-order:stroke;stroke:var(--panel);stroke-width:4px;stroke-linejoin:round}
+svg .b{font-weight:500;fill:var(--ink)}
+svg .big{font-size:13px}
+.k-liq{--k:var(--liq)} .k-blue{--k:var(--blue)} .k-good{--k:var(--good)} .k-bad{--k:var(--bad)} .k-mute{--k:var(--mute)} .k-ink{--k:var(--ink)}
+svg .zone{fill:var(--k);fill-opacity:.15;stroke:var(--k);stroke-opacity:.55;stroke-width:1}
+svg .band{fill:var(--k);fill-opacity:.07}
+svg .ln{stroke:var(--k);stroke-width:1.5;fill:none}
+svg .ln.d{stroke-dasharray:5 4}
+svg .kt{fill:var(--k)}
+svg text.kt{fill:var(--k);font-weight:500}
+svg .tag rect{fill:var(--k)} svg .tag text{fill:#fff;font-weight:500}
+svg .k-liq.tag text{fill:#1A1100}
+svg .k-liq text.kt{fill:var(--liq-ink)}
+svg .k-ink.tag text{fill:#000}
+svg .cu{fill:var(--cup);stroke:var(--cup)} svg .cd{fill:var(--cdn);stroke:var(--cdn)}
+svg .wk{stroke-width:1.4}
+svg .grid{stroke:var(--line);stroke-width:1}
+svg .axis{stroke:var(--mute);stroke-width:1}
+svg .dot{fill:var(--k);stroke:var(--panel);stroke-width:2}
+
+.steps{display:grid;grid-template-columns:repeat(auto-fit,minmax(190px,1fr));gap:12px;margin:26px 0}
+.step{background:var(--panel);border:1px solid var(--line);border-radius:12px;padding:16px 18px;position:relative}
+.step b{display:block;font:700 17px/1.2 var(--f-display);margin-bottom:6px}
+.step em{display:block;font:500 11px/1 var(--f-mono);letter-spacing:.12em;text-transform:uppercase;color:var(--mute);margin-bottom:10px;font-style:normal}
+.step p{font-size:14.5px;line-height:1.5;margin:0;color:var(--ink2)}
+.tbl{overflow-x:auto;margin:22px 0;border:1px solid var(--line);border-radius:12px;background:var(--panel)}
+table{border-collapse:collapse;width:100%;font-size:15px}
+th,td{text-align:left;padding:11px 16px;border-bottom:1px solid var(--line);vertical-align:top}
+th{font:500 11.5px/1.2 var(--f-mono);letter-spacing:.1em;text-transform:uppercase;color:var(--mute);background:var(--panel2)}
+tr:last-child td{border-bottom:0}
+td.n,th.n{text-align:right;font-variant-numeric:tabular-nums;font-family:var(--f-mono)}
+
+.wid{margin:30px 0;background:var(--panel);border:1px solid var(--line);border-radius:14px}
+.wid-h{padding:14px 20px;border-bottom:1px solid var(--line);font:700 17px/1.2 var(--f-display);display:flex;justify-content:space-between;gap:12px;align-items:baseline}
+.wid-h span{font:500 11px/1 var(--f-mono);letter-spacing:.12em;text-transform:uppercase;color:var(--mute)}
+.wid-b{padding:18px 20px}
+.ctl{display:grid;grid-template-columns:repeat(auto-fit,minmax(190px,1fr));gap:14px 22px;margin-bottom:16px}
+.ctl label{display:block;font:500 12px/1.2 var(--f-mono);letter-spacing:.05em;color:var(--mute);margin-bottom:6px;text-transform:uppercase}
+.ctl output{float:right;color:var(--ink);font-weight:500}
+.ctl input[type=range]{width:100%;accent-color:#fff}
+.ctl input[type=number],.ctl select{width:100%;padding:9px 11px;border:1px solid var(--line);border-radius:8px;background:var(--bg);color:var(--ink);font:500 15px var(--f-mono)}
+.btn{background:var(--ink);color:var(--bg);border:0;border-radius:8px;padding:10px 18px;font:600 14px var(--f-body)}
+.btn.alt{background:none;border:1px solid var(--line);color:var(--ink)}
+.btn.liq{background:#fff;color:#000}
+.stats{display:grid;grid-template-columns:repeat(auto-fit,minmax(150px,1fr));gap:10px;margin-top:14px}
+.stat{background:var(--bg);border:1px solid var(--line);border-radius:10px;padding:11px 14px}
+.stat small{display:block;font:500 11px/1.2 var(--f-mono);letter-spacing:.08em;text-transform:uppercase;color:var(--mute);margin-bottom:5px}
+.stat b{font:700 22px/1.1 var(--f-display);font-variant-numeric:tabular-nums}
+.stat.bad{border-style:dashed}
+.seg{display:flex;flex-wrap:wrap;gap:8px;margin-bottom:14px}
+.seg button{border:1px solid var(--line);background:var(--bg);border-radius:20px;padding:7px 14px;font:500 13px var(--f-body)}
+.seg button[aria-pressed=true]{background:var(--ink);color:var(--bg);border-color:var(--ink)}
+.read{background:var(--bg);border:1px solid var(--line);border-radius:10px;padding:14px 18px;font-size:15.5px;line-height:1.55;margin-top:12px}
+
+.quiz{margin:50px 0 10px;background:var(--panel);border:1px solid var(--line);border-radius:14px;overflow:hidden}
+.quiz>h3{margin:0;padding:16px 22px;border-bottom:1px solid var(--line);display:flex;justify-content:space-between;align-items:baseline}
+.quiz>h3 span{font:500 12px var(--f-mono);color:var(--mute)}
+.qi{padding:20px 22px;border-bottom:1px solid var(--line)}
+.qi:last-child{border-bottom:0}
+.qi p{font-weight:600;margin-bottom:10px}
+.qo{display:block;width:100%;text-align:left;margin:6px 0;padding:10px 14px;border:1px solid var(--line);border-radius:9px;background:var(--bg)}
+.qo:hover:not(:disabled){border-color:var(--ink2)}
+.qo.ok{background:#fff;color:#000;border-color:#fff;font-weight:600}
+.qo.no{background:var(--panel2);border-style:dashed;color:var(--mute);text-decoration:line-through}
+.qw{margin-top:8px;font-size:14.5px;color:var(--ink2);display:none}
+.qi.answered .qw{display:block}
+
+.recap{margin:44px 0 0;background:var(--panel2);color:var(--ink);border:1px solid var(--line);border-radius:14px;padding:26px 30px}
+.recap h3{margin:0 0 10px;font-size:13px;font:500 12px var(--f-mono);letter-spacing:.14em;text-transform:uppercase;color:var(--mute)}
+.recap li{color:var(--ink2)}
+.pager{display:flex;justify-content:space-between;gap:12px;margin-top:30px;flex-wrap:wrap}
+.pager .btn{padding:12px 20px}
+.disc{margin-top:50px;padding-top:18px;border-top:1px solid var(--line);font-size:13px;line-height:1.5;color:var(--mute);max-width:80ch}
+.cards{display:grid;grid-template-columns:repeat(auto-fill,minmax(290px,1fr));gap:14px;margin:26px 0}
+.card{display:block;text-align:left;background:var(--panel);border:1px solid var(--line);border-radius:12px;padding:16px 18px;text-decoration:none;color:var(--ink)}
+.card:hover{border-color:#fff}
+.card small{font:500 11px var(--f-mono);letter-spacing:.1em;color:var(--mute);text-transform:uppercase}
+.card b{display:block;font:700 18px/1.2 var(--f-display);margin:6px 0 4px}
+.card span{font-size:14px;color:var(--ink2);line-height:1.45;display:block}
+.gl dt{font:700 17px var(--f-display);margin-top:20px}
+.gl dd{margin:3px 0 0;max-width:70ch;color:var(--ink2)}
+.chk{display:flex;gap:12px;align-items:flex-start;padding:10px 0;border-bottom:1px solid var(--line);cursor:pointer}
+.chk input{margin-top:6px;accent-color:#fff;width:18px;height:18px;flex:none}
+
+@media (max-width:980px){
+  #side{transform:translateX(-100%);transition:transform .2s}
+  body.menu #side{transform:none}
+  #main{margin-left:0}
+  #burger{display:block;position:fixed;top:max(10px,env(safe-area-inset-top,0px));left:max(12px,env(safe-area-inset-left,0px));z-index:40;background:var(--ink);color:var(--bg);border:0;border-radius:8px;padding:9px 14px;font:600 13px var(--f-body)}
+  .page{padding-top:66px;padding-left:max(16px,env(safe-area-inset-left,0px));padding-right:max(16px,env(safe-area-inset-right,0px))}
+  .row2{grid-template-columns:1fr}
+  .row2>.fig-b+.fig-b{border-left:0;border-top:1px solid var(--line)}
+}
+@media (prefers-reduced-motion:reduce){*{transition:none!important;scroll-behavior:auto!important}}
+svg .grid{stroke:var(--line);stroke-opacity:.7}
+.fig,.wid,.quiz,.step,.goals,.card,.tbl,.box{box-shadow:none}
+#side{background:var(--side)}
+
+body{font-size:clamp(17px,.62vw + 8px,23px)}
+h2{font-size:clamp(29px,1.7vw,42px)}
+.hd{display:grid;grid-template-columns:minmax(0,1.5fr) minmax(0,1fr);gap:clamp(28px,3vw,64px);align-items:start;margin-bottom:6px}
+.hd .goals{margin-top:6px}
+.read b[style],.read span[style]{color:var(--ink)!important}
+.gl{columns:3 340px;column-gap:56px}
+.gl dt{break-after:avoid}
+.recap ul{columns:1}
+@media (min-width:1700px){
+  .body .sec{display:grid;grid-template-columns:minmax(0,5fr) minmax(0,7fr);column-gap:clamp(48px,3.4vw,96px);align-items:start}
+  .sec>h2{grid-column:1/-1}
+  .sec>.tx{grid-column:1}.sec>.vz{grid-column:2}
+  .sec.solo>.tx{grid-column:1/-1;columns:2 560px;column-gap:56px}
+  .sec.vonly>.vz{grid-column:1/-1}
+  .sec.solo .box{break-inside:avoid}
+  .tx>:first-child,.vz>:first-child{margin-top:0}
+  .tx p,.tx ul,.tx ol{max-width:none}
+  .quiz{column-count:2;column-gap:0}
+  .quiz>h3{column-span:all}
+  .qi{break-inside:avoid}
+  .recap ul{columns:2;column-gap:56px}
+}
+@media (max-width:1100px){.hd{grid-template-columns:1fr}}
+</style>
+
+<button id="burger" aria-label="Open course menu">Menu</button>
+<aside id="side" aria-label="Course navigation">
+  <div class="brand"><b>Liquidity <i>Playbook</i></b><span>A visual study course in futures day trading</span></div>
+  <div class="prog" id="prog"></div>
+  <nav id="nav"></nav>
+  <div class="side-foot"><span>Eastern Time (ET)</span><button id="theme" type="button" hidden>Theme</button><span>Black &amp; white</span></div>
+</aside>
+<main id="main"></main>
+<script>
+/* ========== helpers ========== */
+const $=(s,r=document)=>r.querySelector(s), $$=(s,r=document)=>[...r.querySelectorAll(s)];
+function rng(seed){let s=seed>>>0;return()=>{s=(s*1664525+1013904223)>>>0;return s/4294967296}}
+function K(o,c,wu=1,wl=1){return{o,c,h:Math.max(o,c)+wu,l:Math.min(o,c)-wl}}
+function chain(start,list,seed=7){const r=rng(seed);let p=start;return list.map(e=>{let c,wu,wl;if(Array.isArray(e))[c,wu,wl]=e;else c=e;
+  if(wu===undefined)wu=.4+r()*.9;if(wl===undefined)wl=.4+r()*.9;const k=K(p,c,wu,wl);p=c;return k})}
+function flip(cs,ax){return cs.map(k=>({o:2*ax-k.o,c:2*ax-k.c,h:2*ax-k.l,l:2*ax-k.h}))}
+const esc=s=>String(s).replace(/&/g,'&amp;').replace(/</g,'&lt;');
+let UID=0;
+
+/* ========== candle chart engine ========== */
+function candleChart(sp){
+  const cs=sp.c,n=cs.length,W=sp.w||760,H=sp.h||340,uid='m'+(++UID);
+  const pd=Object.assign({l:16,r:16,t:30,b:sp.xl?30:16},sp.pad||{});
+  let lo=Math.min(...cs.map(k=>k.l)),hi=Math.max(...cs.map(k=>k.h));
+  if(sp.y){lo=sp.y[0];hi=sp.y[1]}else{const m=(hi-lo)*.1;lo-=m;hi+=m}
+  const iw=W-pd.l-pd.r,ih=H-pd.t-pd.b,st=iw/n,bw=Math.min(24,st*.58);
+  const X=i=>pd.l+(i+.5)*st,Y=p=>pd.t+(hi-p)/(hi-lo)*ih;
+  const R=p=>{if(typeof p==='number')return p;if(p==='T')return hi;if(p==='B')return lo;
+    const m=/^(bt|bb|o|h|l|c)(\d+)([+-][\d.]+)?$/.exec(p);if(!m)throw new Error('bad ref '+p);
+    const k=cs[+m[2]];if(!k)throw new Error('no candle '+p);
+    const v=m[1]==='bt'?Math.max(k.o,k.c):m[1]==='bb'?Math.min(k.o,k.c):k[m[1]];return v+(m[3]?+m[3]:0)};
+  const txt=(x,y,s,cls,anc)=>{const L=String(s).split('\n');
+    return `<text x="${x.toFixed(1)}" y="${y.toFixed(1)}" text-anchor="${anc||'start'}" class="halo ${cls||''}">${L.map((t,i)=>`<tspan x="${x.toFixed(1)}" dy="${i?13:0}">${esc(t)}</tspan>`).join('')}</text>`};
+  let under='',over='';
+  (sp.a||[]).forEach(a=>{const c=a.cls||'k-mute';
+    switch(a.t){
+    case'zone':{const x1=X(a.i1)-st/2,x2=X(a.i2)+st/2,y1=Y(R(a.p1)),y2=Y(R(a.p2)),t=Math.min(y1,y2),h=Math.abs(y2-y1);
+      under+=`<g class="${c}"><rect class="${a.band?'band':'zone'}" x="${x1.toFixed(1)}" y="${t.toFixed(1)}" width="${(x2-x1).toFixed(1)}" height="${h.toFixed(1)}"/></g>`;
+      if(a.s){const la=a.la||'tl';const tx=la.includes('r')?x2-6:la==='c'?(x1+x2)/2:x1+6,ty=la.includes('b')?t+h-8:la==='c'?t+h/2+4:t+14;
+        over+=`<g class="${c}">${txt(tx,ty,a.s,'kt',la.includes('r')?'end':la==='c'?'middle':'start')}</g>`}break}
+    case'hline':{const x1=a.i1==null?pd.l:X(a.i1),x2=a.i2==null?W-pd.r:X(a.i2),y=Y(R(a.p));
+      over+=`<g class="${c}"><line class="ln ${a.d===false?'':'d'}" x1="${x1}" x2="${x2}" y1="${y}" y2="${y}"/>`;
+      if(a.s){const l=a.la==='l';over+=txt(l?x1+4:x2-4,y+(a.below?15:-6),a.s,'kt',l?'start':'end')}over+='</g>';break}
+    case'vline':{const x=X(a.i);over+=`<g class="${c}"><line class="ln d" x1="${x}" x2="${x}" y1="${pd.t}" y2="${H-pd.b}"/>${a.s?txt(x+4,pd.t+10,a.s,'kt'):''}</g>`;break}
+    case'text':over+=`<g class="${c}">${txt(X(a.i)+(a.dx||0),Y(R(a.p))+(a.dy||0),a.s,'kt '+(a.big?'big':''),a.anc)}</g>`;break;
+    case'tag':{const x=X(a.i)+(a.dx||0),y=Y(R(a.p))+(a.dy||0),w=a.s.length*6.5+14;
+      over+=`<g class="tag ${c}"><rect x="${(a.anc==='end'?x-w:a.anc==='middle'?x-w/2:x).toFixed(1)}" y="${y-12}" width="${w}" height="19" rx="4"/><text x="${(a.anc==='end'?x-w/2:a.anc==='middle'?x:x+w/2).toFixed(1)}" y="${y+1.5}" text-anchor="middle">${esc(a.s)}</text></g>`;break}
+    case'arrow':over+=`<g class="${c}"><line class="ln ${a.d?'d':''}" x1="${X(a.i1)}" y1="${Y(R(a.p1))}" x2="${X(a.i2)}" y2="${Y(R(a.p2))}" marker-end="url(#ah${uid})"/>${a.s?txt((X(a.i1)+X(a.i2))/2+(a.dx||8),(Y(R(a.p1))+Y(R(a.p2)))/2+(a.dy||0),a.s,'kt',a.anc):''}</g>`;break;
+    case'dot':over+=`<g class="${c}"><circle class="dot" cx="${X(a.i)}" cy="${Y(R(a.p))}" r="${a.r||5}"/>${a.s?txt(X(a.i)+(a.dx||9),Y(R(a.p))+(a.dy||4),a.s,'kt',a.anc):''}</g>`;break;
+    case'poly':over+=`<g class="${c}"><polyline class="ln ${a.d?'d':''}" points="${a.pts.map(q=>X(q[0]).toFixed(1)+','+Y(R(q[1])).toFixed(1)).join(' ')}"/></g>`;break;
+    case'range':{const l=R(a.lo),h=R(a.hi),m=(l+h)/2;
+      under+=`<g class="k-bad"><rect class="zone" x="${X(a.i1)-st/2}" y="${Y(h)}" width="${X(a.i2)-X(a.i1)+st}" height="${Y(m)-Y(h)}"/></g><g class="k-good"><rect class="zone" x="${X(a.i1)-st/2}" y="${Y(m)}" width="${X(a.i2)-X(a.i1)+st}" height="${Y(l)-Y(m)}"/></g>`;
+      const x2=X(a.i2)+st/2;over+=`<g class="k-ink"><line class="ln d" x1="${X(a.i1)-st/2}" x2="${x2}" y1="${Y(m)}" y2="${Y(m)}"/>${txt(x2-4,Y(m)-6,'EQ 50%','kt','end')}</g><g class="k-bad">${txt(X(a.i1)-st/2+6,Y(h)+14,a.top||'PREMIUM','kt')}</g><g class="k-good">${txt(X(a.i1)-st/2+6,Y(l)-8,a.bot||'DISCOUNT','kt')}</g>`;break}
+    }});
+  let body='';
+  for(let g=0;g<=5;g++){const gy=(pd.t+ih*g/5).toFixed(1);under+=`<line class="grid" x1="${pd.l}" x2="${W-pd.r}" y1="${gy}" y2="${gy}"/>`}
+  cs.forEach((k,i)=>{const up=k.c>=k.o,x=X(i),top=Y(Math.max(k.o,k.c)),bh=Math.max(1.6,Math.abs(Y(k.o)-Y(k.c))),cl=(k.cls||(up?'cu':'cd'));
+    body+=`<g class="${cl}"><line class="wk" x1="${x.toFixed(1)}" x2="${x.toFixed(1)}" y1="${Y(k.h).toFixed(1)}" y2="${Y(k.l).toFixed(1)}"/><rect x="${(x-bw/2).toFixed(1)}" y="${top.toFixed(1)}" width="${bw.toFixed(1)}" height="${bh.toFixed(1)}" rx="1"/></g>`});
+  let xl='';if(sp.xl)Object.entries(sp.xl).forEach(([i,l])=>{xl+=`<text x="${X(+i)}" y="${H-8}" text-anchor="middle">${esc(l)}</text><line class="grid" x1="${X(+i)}" x2="${X(+i)}" y1="${H-pd.b}" y2="${H-pd.b+4}"/>`});
+  return `<svg viewBox="0 0 ${W} ${H}" role="img" aria-label="${esc(sp.alt||'Annotated candlestick chart')}"><defs><marker id="ah${uid}" viewBox="0 0 10 10" refX="8" refY="5" markerWidth="7" markerHeight="7" orient="auto"><path d="M0 0L10 5L0 10z" fill="context-stroke"/></marker></defs><rect class="band k-mute" x="0" y="0" width="${W}" height="${H}" fill="none"/>${under}${body}${over}${xl}</svg>`}
+
+/* ========== generic line plot ========== */
+function plotLines(sp){
+  const W=sp.w||760,H=sp.h||320,pd=Object.assign({l:54,r:22,t:24,b:44},sp.pad||{});
+  const [x0,x1]=sp.x,[y0,y1]=sp.y,iw=W-pd.l-pd.r,ih=H-pd.t-pd.b;
+  const X=v=>pd.l+(v-x0)/(x1-x0)*iw,Y=v=>pd.t+(y1-v)/(y1-y0)*ih;let s=`<svg viewBox="0 0 ${W} ${H}" role="img" aria-label="${esc(sp.alt||'Line chart')}">`;
+  (sp.yt||[]).forEach(t=>{s+=`<line class="grid" x1="${pd.l}" x2="${W-pd.r}" y1="${Y(t.v)}" y2="${Y(t.v)}"/><text x="${pd.l-8}" y="${Y(t.v)+4}" text-anchor="end">${esc(t.s)}</text>`});
+  (sp.xt||[]).forEach(t=>{s+=`<line class="grid" x1="${X(t.v)}" x2="${X(t.v)}" y1="${pd.t}" y2="${H-pd.b}"/><text x="${X(t.v)}" y="${H-pd.b+17}" text-anchor="middle">${esc(t.s)}</text>`});
+  s+=`<line class="axis" x1="${pd.l}" x2="${W-pd.r}" y1="${H-pd.b}" y2="${H-pd.b}"/><line class="axis" x1="${pd.l}" x2="${pd.l}" y1="${pd.t}" y2="${H-pd.b}"/>`;
+  if(sp.xlab)s+=`<text x="${pd.l+iw/2}" y="${H-6}" text-anchor="middle">${esc(sp.xlab)}</text>`;
+  if(sp.ylab)s+=`<text transform="translate(13 ${pd.t+ih/2}) rotate(-90)" text-anchor="middle">${esc(sp.ylab)}</text>`;
+  (sp.hl||[]).forEach(h=>{s+=`<g class="${h.cls||'k-mute'}"><line class="ln d" x1="${pd.l}" x2="${W-pd.r}" y1="${Y(h.v)}" y2="${Y(h.v)}"/>${h.s?`<text class="kt halo" x="${W-pd.r-4}" y="${Y(h.v)-6}" text-anchor="end">${esc(h.s)}</text>`:''}</g>`});
+  (sp.s||[]).forEach(q=>{const pts=q.pts.map(p=>X(p[0]).toFixed(1)+','+Y(p[1]).toFixed(1)).join(' ');
+    if(q.area)s+=`<g class="${q.cls}"><polygon class="zone" points="${X(q.pts[0][0])},${Y(y0)} ${pts} ${X(q.pts[q.pts.length-1][0])},${Y(y0)}"/></g>`;
+    s+=`<g class="${q.cls}"><polyline class="ln ${q.d?'d':''}" style="${q.w?'stroke-width:'+q.w:''}" points="${pts}"/>${q.s?`<text class="kt halo" x="${X(q.pts[q.pts.length-1][0])-4}" y="${Y(q.pts[q.pts.length-1][1])-8}" text-anchor="end">${esc(q.s)}</text>`:''}</g>`});
+  (sp.p||[]).forEach(p=>{s+=`<g class="${p.cls||'k-liq'}"><circle class="dot" cx="${X(p.x)}" cy="${Y(p.y)}" r="${p.r||5}"/>${p.s?`<text class="kt halo" x="${X(p.x)+(p.dx??9)}" y="${Y(p.y)+(p.dy??-9)}" text-anchor="${p.anc||'start'}">${esc(p.s)}</text>`:''}</g>`});
+  return s+'</svg>'}
+
+/* ========== figure / widget registries ========== */
+const FIG={},WID={},PAGES=[];
+const F=(name,cap,t)=>`<figure class="fig"><div class="fig-h"><span class="fn"></span><span>${esc(t||'')}</span></div><div class="fig-b" data-fig="${name}"></div><figcaption class="fig-c">${cap}</figcaption></figure>`;
+const F2=(a,b,cap,la,lb,t)=>`<figure class="fig"><div class="fig-h"><span class="fn"></span><span>${esc(t||'')}</span></div><div class="row2"><div class="fig-b"><div class="sub">${la}</div><div data-fig="${a}"></div></div><div class="fig-b"><div class="sub">${lb}</div><div data-fig="${b}"></div></div></div><figcaption class="fig-c">${cap}</figcaption></figure>`;
+const W_=name=>`<div class="wid" data-wid="${name}"></div>`;
+const box=(k,label,html)=>`<div class="box ${k}"><b>${label}</b>${html}</div>`;
+const KEY=h=>box('key','Key idea',h),WARN=h=>box('warn','Common mistake',h),TIP=h=>box('tip','Practitioner tip',h),DEF=(t,h)=>box('def',t,h);
+const tbl=(head,rows,nums=[])=>`<div class="tbl"><table><thead><tr>${head.map((h,i)=>`<th class="${nums.includes(i)?'n':''}">${h}</th>`).join('')}</tr></thead><tbody>${rows.map(r=>`<tr>${r.map((c,i)=>`<td class="${nums.includes(i)?'n':''}">${c}</td>`).join('')}</tr>`).join('')}</tbody></table></div>`;
+const steps=l=>`<div class="steps">${l.map(s=>`<div class="step"><em>${s[0]}</em><b>${s[1]}</b><p>${s[2]}</p></div>`).join('')}</div>`;
+
+/* ========== state ========== */
+let S={done:{},quiz:{},chk:{},exam:null},mem=false;
+try{const v=localStorage.getItem('lp-state-v1');if(v)S=Object.assign(S,JSON.parse(v))}catch(e){mem=true}
+function save(){try{localStorage.setItem('lp-state-v1',JSON.stringify(S))}catch(e){}}
+try{const t=localStorage.getItem('lp-theme');if(t)document.documentElement.dataset.theme=t}catch(e){}
+
+/* ========== quiz ========== */
+function quizHTML(id,items,title){
+  return `<section class="quiz" data-quiz="${id}"><h3>${title||'Checkpoint quiz'}<span class="qs"></span></h3>${items.map((q,i)=>`<div class="qi" data-i="${i}"><p>${i+1}. ${q.q}</p>${q.o.map((o,j)=>`<button type="button" class="qo" data-j="${j}">${o}</button>`).join('')}<div class="qw"><b>${'Why:'}</b> ${q.w}</div></div>`).join('')}</section>`}
+function wireQuiz(root){
+  $$('.quiz',root).forEach(qz=>{const id=qz.dataset.quiz,items=(QZ[id]||[]);const upd=()=>{const a=$$('.qi.answered',qz).length,ok=$$('.qo.ok.picked',qz).length;$('.qs',qz).textContent=`${ok} correct · ${a}/${items.length} answered`;
+      if(a===items.length){if(id==='exam')S.exam=ok;else S.quiz[id]=ok;save();refreshNav()}};
+    qz.addEventListener('click',e=>{const b=e.target.closest('.qo');if(!b)return;const qi=b.closest('.qi');if(qi.classList.contains('answered'))return;
+      const q=items[+qi.dataset.i],j=+b.dataset.j;qi.classList.add('answered');$$('.qo',qi).forEach((x,k)=>{x.disabled=true;if(k===q.a)x.classList.add('ok');});
+      if(j===q.a)b.classList.add('picked');else b.classList.add('no');upd()});upd()})}
+const QZ={};
+
+/* ========== nav / router ========== */
+const PARTS={I:'Foundations',II:'Liquidity',III:'Structure & Imbalance',IV:'Timing & Correlation',V:'Putting It Together',T:'Reference'};
+function modules(){return PAGES.filter(p=>p.n)}
+function refreshNav(){
+  const mods=modules(),d=mods.filter(m=>S.done[m.id]).length,pc=Math.round(d/mods.length*100);
+  $('#prog').innerHTML=`<svg width="54" height="54" viewBox="0 0 54 54"><circle cx="27" cy="27" r="22" fill="none" stroke="var(--side-line)" stroke-width="5"/><circle cx="27" cy="27" r="22" fill="none" stroke="#fff" stroke-width="5" stroke-linecap="round" stroke-dasharray="${(138.2*pc/100).toFixed(1)} 138.2" transform="rotate(-90 27 27)"/><text x="27" y="31" text-anchor="middle" style="fill:var(--side-ink);font:600 12px var(--f-mono)">${pc}%</text></svg><div><strong>${d} of ${mods.length} modules</strong>${mem?'Progress not saved in this view':'Progress saves in this browser'}</div>`;
+  let h='',last='';const cur=location.hash.slice(1)||'welcome';
+  PAGES.forEach(p=>{const part=p.part||'';if(part!==last){h+=part?`<div class="nav-part">${PARTS[part]||part}</div>`:'';last=part}
+    h+=`<button class="nav-i ${S.done[p.id]?'done':''}" data-go="${p.id}" ${cur===p.id?'aria-current="page"':''}><span class="no">${p.n?(S.done[p.id]?'&#10003;':p.n):'&#9679;'}</span><span>${p.title}</span></button>`});
+  $('#nav').innerHTML=h}
+function pageHTML(p){
+  if(p.raw){const h=p.html,i=h.indexOf('<h2');return i<0?h:h.slice(0,i)+'<div class="body">'+h.slice(i)+'</div>'}
+  const i=PAGES.indexOf(p),prev=PAGES[i-1],next=PAGES[i+1];
+  return `<header class="hd"><div><div class="eyebrow">Part ${p.part} &middot; Module ${p.n}</div><h1>${p.title}</h1><p class="lead">${p.lead}</p>
+  <div class="chips"><span class="chip">${p.min} min read</span><span class="chip">${p.level}</span><span class="chip">${p.src}</span></div></div>
+  <div class="goals"><h4>After this module you can</h4><ul>${p.goals.map(g=>`<li>${g}</li>`).join('')}</ul></div></header><div class="body">${p.html}</div>
+  <section class="recap"><h3>Module recap</h3><ul>${p.recap.map(r=>`<li>${r}</li>`).join('')}</ul></section>
+  ${quizHTML(p.id,QZ[p.id])}
+  <div class="pager"><button class="btn alt" data-go="${prev?prev.id:'welcome'}">&larr; ${prev?prev.title:'Start'}</button><button class="btn ${S.done[p.id]?'alt':'liq'}" data-done="${p.id}">${S.done[p.id]?'Completed. Undo':'Mark module complete'}</button>${next?`<button class="btn" data-go="${next.id}">${next.title} &rarr;</button>`:''}</div>
+  <p class="disc">Educational material only. It is not financial advice or a signal service. Futures and leveraged products can lose more than you deposit, and most day traders lose money. Practise on a simulator first.</p>`}
+function hydrate(root,p){
+  let k=0;$$('.fig',root).forEach(f=>{k++;const fn=$('.fn',f);if(fn)fn.textContent='Fig '+(p&&p.n?p.n+'.':'')+k});
+  $$('[data-fig]',root).forEach(el=>{try{el.innerHTML=FIG[el.dataset.fig]()}catch(e){el.innerHTML='<p>Chart error: '+esc(e.message)+'</p>';console.error(el.dataset.fig,e)}});
+  $$('[data-wid]',root).forEach(el=>{try{WID[el.dataset.wid](el)}catch(e){el.innerHTML='<p>Widget error</p>';console.error(el.dataset.wid,e)}});
+  wireQuiz(root)}
+function route(){
+  const id=location.hash.slice(1)||'welcome',p=PAGES.find(x=>x.id===id)||PAGES[0];
+  $('#main').innerHTML=`<div class="page">${pageHTML(p)}</div>`;hydrate($('#main'),p);applyLayout();refreshNav();window.scrollTo(0,0);document.body.classList.remove('menu');
+  document.title='Liquidity Playbook'}
+
+/* ===== wide-screen layout: text left, visuals right ===== */
+const MQ=matchMedia('(min-width:1700px)');
+function flatten(){const body=$('.body');if(!body||!body.dataset.sec)return;const all=[];$$('.sec',body).forEach(sc=>{[...sc.children].forEach(c=>{if(c.classList.contains('tx')||c.classList.contains('vz'))[...c.children].forEach(n=>all.push(n));else all.push(c)})});
+  all.sort((a,b)=>a._i-b._i);body.innerHTML='';all.forEach(n=>body.appendChild(n));delete body.dataset.sec}
+function sectionize(){const body=$('.body');if(!body||body.dataset.sec)return;const nodes=[...body.children];nodes.forEach((n,i)=>n._i=i);body.innerHTML='';body.dataset.sec='1';
+  let sec=null,tx=null,vz=null;const mk=h=>{sec=document.createElement('section');sec.className='sec';if(h)sec.appendChild(h);tx=document.createElement('div');tx.className='tx';vz=document.createElement('div');vz.className='vz';sec.append(tx,vz);body.appendChild(sec)};
+  nodes.forEach(n=>{if(n.tagName==='H2')mk(n);else{if(!sec)mk(null);(n.matches('.fig,.wid,.tbl,.steps,.cards')?vz:tx).appendChild(n)}});
+  $$('.sec',body).forEach(sc=>{if(!$('.vz',sc).children.length){sc.classList.add('solo');$('.vz',sc).remove()}else if(!$('.tx',sc).children.length){sc.classList.add('vonly');$('.tx',sc).remove()}})}
+function applyLayout(){if(MQ.matches)sectionize();else flatten()}
+MQ.addEventListener('change',applyLayout);
+document.addEventListener('click',e=>{
+  const g=e.target.closest('[data-go]');if(g){e.preventDefault();location.hash=g.dataset.go;return}
+  const d=e.target.closest('[data-done]');if(d){const id=d.dataset.done;S.done[id]=!S.done[id];save();route();return}
+  if(e.target.closest('#burger'))document.body.classList.toggle('menu')});
+$('#theme').addEventListener('click',()=>{const r=document.documentElement,cur=r.dataset.theme||(matchMedia('(prefers-color-scheme: dark)').matches?'dark':'light'),nx=cur==='dark'?'light':'dark';r.dataset.theme=nx;try{localStorage.setItem('lp-theme',nx)}catch(e){}});
+addEventListener('hashchange',route);
+addEventListener('keydown',e=>{if(/INPUT|SELECT|TEXTAREA/.test(document.activeElement.tagName))return;const i=PAGES.findIndex(x=>x.id===(location.hash.slice(1)||'welcome'));
+  if(e.key==='ArrowRight'&&PAGES[i+1])location.hash=PAGES[i+1].id;if(e.key==='ArrowLeft'&&PAGES[i-1])location.hash=PAGES[i-1].id});
+</script>
+<script>
+/* ================= MODULE 1 ================= */
+FIG.longshort1=()=>{const c=chain(100,[100.8,99.5,98,100,103,105.5,107,106,109,112],11);
+  return candleChart({c,w:520,h:320,y:[94,116],alt:'Long trade: buy low, sell high',a:[
+  {t:'zone',i1:2,i2:9,p1:'c2',p2:'c9',cls:'k-good',s:'profit = sell - buy',la:'tl'},
+  {t:'tag',i:2,p:'l2',dy:24,s:'BUY',cls:'k-blue',anc:'middle'},{t:'tag',i:9,p:'h9',dy:-9,s:'SELL',cls:'k-ink',anc:'middle'}]})};
+FIG.longshort2=()=>{const c=flip(chain(100,[100.8,99.5,98,100,103,105.5,107,106,109,112],11),105);
+  return candleChart({c,w:520,h:320,y:[94,116],alt:'Short trade: sell high, buy back low',a:[
+  {t:'zone',i1:2,i2:9,p1:'c9',p2:'c2',cls:'k-good',s:'profit = sell - buy back',la:'bl'},
+  {t:'tag',i:2,p:'h2',dy:-9,s:'SELL (short)',cls:'k-ink',anc:'middle'},{t:'tag',i:9,p:'l9',dy:24,s:'BUY BACK',cls:'k-blue',anc:'middle'}]})};
+FIG.pillars=()=>`<svg viewBox="0 0 760 330" role="img" aria-label="Three pillars of a profitable trader">
+<polygon points="40,86 380,22 720,86" fill="var(--ink)"/><text x="380" y="64" text-anchor="middle" style="fill:var(--bg);font:700 17px var(--f-display)">FULL-TIME PROFITABLE TRADER</text>
+${[['STRATEGY','Know what a valid setup looks like','Daily bias, liquidity, confirmation, entry, targets','k-ink',80],['RISK MANAGEMENT','Survive the losing streaks','Position size, stop placement, drawdown limits','k-ink',280],['PSYCHOLOGY','Do what the plan says, every time','Discipline: no overtrading, overrisking, overleveraging','k-ink',480]].map(p=>`<g class="${p[3]}"><rect x="${p[4]}" y="104" width="200" height="190" rx="6" class="zone"/><text x="${p[4]+100}" y="138" text-anchor="middle" class="kt big" style="font-size:14px">${p[0]}</text><foreignObject x="${p[4]+12}" y="150" width="176" height="140"><div xmlns="http://www.w3.org/1999/xhtml" style="font:500 13px/1.45 var(--f-body);color:var(--ink)"><b style="font-weight:600">${p[1]}.</b><br><span style="color:var(--ink2)">${p[2]}.</span></div></foreignObject></g>`).join('')}
+<rect x="40" y="298" width="680" height="10" rx="3" fill="var(--ink2)"/></svg>`;
+PAGES.push({id:'m01',part:'I',n:1,title:'What Trading Really Is',min:14,level:'Foundation',src:'Source: lesson "What is Trading"',
+lead:'Before any chart or setup, you need a working definition of the job. Get this wrong and every later concept gets used for the wrong purpose.',
+goals:['State a precise, useful definition of day trading','Explain why chasing money is the fastest way to trade badly','Describe long and short trades and how each makes a profit','Name the three skill sets every profitable trader needs'],
+html:`
+<h2>A definition worth memorising</h2>
+<p>Day trading is the ability to predict, with high probability, where the price of an asset is going to go on a given day. Making money is what happens when that ability is good and well managed. It is a by-product, not the skill itself.</p>
+${KEY('<p>You are not trying to "make money". You are trying to become reliably good at predicting daily price delivery, then taking only the trades where the odds clearly favour you. Profit is the output of that process.</p>')}
+<h3>There is no skill called "being good at making money"</h3>
+<p>People who earn large amounts have developed specialised skills the market pays for. Money is the reward the market attaches to a skill. When a beginner keeps their eyes on the money, three things happen: anxiety rises, fear of missing out (FOMO) grows, and decisions turn impulsive. When attention stays on technical execution, those pressures fade and the money question answers itself over time.</p>
+<h2>Long and short: two ways to profit</h2>
+<p>You can profit from price rising or falling. A <b>long</b> (buy) trade profits when you buy low and later sell higher. A <b>short</b> (sell) trade works in reverse: you sell first at a high price, then buy back lower. Either way you are doing the same thing, buying low and selling high, in a different order.</p>
+${F2('longshort1','longshort2','Both trades capture the same distance. Direction does not matter, being right about direction does.','Long: buy low, sell high','Short: sell high, buy back low','Two ways to profit')}
+<h2>Technical vs fundamental traders</h2>
+<p>There are two broad schools. <b>Fundamental</b> traders and investors study news, earnings and macro data, and usually hold for long periods. <b>Technical</b> traders read price itself and act on what the chart shows. Day traders in this course are technical: they buy low and sell high (or sell high and buy back low) within the day, so the first requirement is being able to <em>see</em> price properly. That is Module 2.</p>
+<h2>Mechanics beat memorised patterns</h2>
+<p>A common beginner approach is to memorise chart patterns such as head and shoulders or double tops, or to draw support and resistance lines and hope price bounces. The problem is the missing "why". A pattern tells you what a chart looked like on other days, not why orders are moving price right now.</p>
+<p>This course builds the opposite habit. You will always ask: where are orders waiting, were they filled, and is the new direction continuing? That is a <b>mechanical</b> view of the market. Everything that follows (liquidity, structure, imbalances, time) is a tool for answering those three questions.</p>
+${WARN('<p>Believing you will become rich in a few months. That expectation pushes people to force setups, raise leverage and break rules, which guarantees account failure. Treat it like a skill that takes years, because it does.</p>')}
+<h2>The three skill sets</h2>
+<p>Strategy alone does not make a trader. You need all three of the following, and a weakness in any one will cap your results.</p>
+${F('pillars','Remove any pillar and the roof falls. Most beginners spend 100% of their time on the first one.','The foundation')}
+<h2>How to learn this properly</h2>
+<p>Watching lessons gives you information. Information is step one of a longer loop. The skill that separates profitable traders is built by repetition on charts, mistakes, review, and more repetition.</p>
+${steps([['Step 1','Study','Learn one concept and its exact rules.'],['Step 2','Mark','Find 10 real examples on past charts and mark them.'],['Step 3','Backtest','Replay the market and "trade" the concept with fixed rules.'],['Step 4','Journal','Log every trade with screenshots, reasoning and outcome.'],['Step 5','Review','Find your repeated mistakes. Fix one at a time.']])}
+<p>The instructor compares this to a basketball star sharing his training plan. The plan helps, but only the person who does the work gets the result. Plan on hundreds of hours of screen time before you judge your own ability.</p>`,
+recap:['Day trading = predicting daily price delivery with high probability. Profit is a by-product.','Attention on money creates anxiety and bad decisions. Attention on execution creates skill.','Long = buy low, sell high. Short = sell high, buy back low.','Always ask why price is moving: orders waiting, orders filled, direction continuing.','You need strategy, risk management and psychology. Knowledge alone is not skill.']});
+QZ.m01=[
+{q:'Which statement best matches the course definition of day trading?',o:['Making as much money as possible each day','Predicting with high probability where price will go on a given day','Buying anything that is going up','Following a fixed list of chart patterns'],a:1,w:'The skill is probabilistic prediction of daily price delivery. Profit follows from doing that well.'},
+{q:'You enter a short trade at 112 and buy back at 98. What is the outcome?',o:['A loss of 14 points','A gain of 14 points','No change','A gain only if price later rises'],a:1,w:'A short profits when price falls. You sold high (112) and bought back low (98), earning the 14-point difference.'},
+{q:'Why is a pure focus on money harmful?',o:['Money is not important','It creates anxiety, FOMO and impulsive decisions','It makes you trade less','It improves discipline'],a:1,w:'Money focus pulls attention from technical execution toward emotion, which degrades decisions.'},
+{q:'Which is NOT one of the three skill sets?',o:['Strategy','Risk management','Psychology','Social media following'],a:3,w:'The three pillars are strategy, risk management and psychology (discipline).'}];
+
+/* ================= MODULE 2 ================= */
+FIG.anatomy=()=>`<svg viewBox="0 0 760 360" role="img" aria-label="Anatomy of an up candle and a down candle">
+<g class="cu"><line class="wk" x1="190" x2="190" y1="52" y2="318"/><rect x="156" y="104" width="68" height="150" rx="2"/></g>
+<g class="cd"><line class="wk" x1="540" x2="540" y1="52" y2="318"/><rect x="506" y="104" width="68" height="150" rx="2"/></g>
+<g class="k-ink" style="font-size:12px">
+<text x="262" y="56">HIGH</text><text x="262" y="108">CLOSE</text><text x="262" y="258">OPEN</text><text x="262" y="322">LOW</text>
+<line class="ln d" x1="196" x2="256" y1="52" y2="52"/><line class="ln d" x1="226" x2="256" y1="104" y2="104"/><line class="ln d" x1="226" x2="256" y1="254" y2="254"/><line class="ln d" x1="196" x2="256" y1="318" y2="318"/>
+<text x="612" y="56">HIGH</text><text x="612" y="108">OPEN</text><text x="612" y="258">CLOSE</text><text x="612" y="322">LOW</text>
+<line class="ln d" x1="546" x2="606" y1="52" y2="52"/><line class="ln d" x1="576" x2="606" y1="104" y2="104"/><line class="ln d" x1="576" x2="606" y1="254" y2="254"/><line class="ln d" x1="546" x2="606" y1="318" y2="318"/></g>
+<g class="k-liq"><text x="150" y="180" text-anchor="end" class="kt">BODY</text><text x="150" y="80" text-anchor="end" class="kt">UPPER WICK</text><text x="150" y="288" text-anchor="end" class="kt">LOWER WICK</text>
+<text x="500" y="180" text-anchor="end" class="kt">BODY</text><text x="500" y="80" text-anchor="end" class="kt">UPPER WICK</text><text x="500" y="288" text-anchor="end" class="kt">LOWER WICK</text></g>
+<text x="190" y="22" text-anchor="middle" class="b big">UP (BULLISH) CANDLE: closes above its open</text><text x="540" y="22" text-anchor="middle" class="b big">DOWN (BEARISH): closes below its open</text></svg>`;
+FIG.trendUp=()=>{const c=chain(100,[102,105,108,106,104,103,107,111,114,112,109,108,112,116,120,118,115,113,118,122,126],3);
+  const T=(i,s)=>({t:'text',i,p:'h'+i,dy:-9,s,cls:'k-good',anc:'middle'}),L=(i,s)=>({t:'text',i,p:'l'+i,dy:19,s,cls:'k-bad',anc:'middle'});
+  return candleChart({c,w:520,h:340,alt:'Uptrend with higher highs and higher lows',a:[{t:'poly',pts:[[2,'h2'],[5,'l5'],[8,'h8'],[11,'l11'],[14,'h14'],[17,'l17'],[20,'h20']],cls:'k-liq'},T(2,'H'),T(8,'HH'),T(14,'HH'),T(20,'HH'),L(5,'L'),L(11,'HL'),L(17,'HL')]})};
+FIG.trendDown=()=>{const c=flip(chain(100,[102,105,108,106,104,103,107,111,114,112,109,108,112,116,120,118,115,113,118,122,126],3),113);
+  const T=(i,s)=>({t:'text',i,p:'h'+i,dy:-9,s,cls:'k-good',anc:'middle'}),L=(i,s)=>({t:'text',i,p:'l'+i,dy:19,s,cls:'k-bad',anc:'middle'});
+  return candleChart({c,w:520,h:340,alt:'Downtrend with lower highs and lower lows',a:[{t:'poly',pts:[[2,'l2'],[5,'h5'],[8,'l8'],[11,'h11'],[14,'l14'],[17,'h17'],[20,'l20']],cls:'k-liq'},L(2,'L'),L(8,'LL'),L(14,'LL'),L(20,'LL'),T(5,'H'),T(11,'LH'),T(17,'LH')]})};
+WID.candleBuilder=el=>{
+  const cs=chain(100,[101.2,102.6,101.4,100.2,99,100.4,102.2,103.9,105.3,104.2,106.1,107],21);
+  el.innerHTML=`<div class="wid-h">Candle builder: five-minute candles become a one-hour candle<span>Interactive</span></div><div class="wid-b"><div class="ctl"><div><label for="cbN">Five-minute candles included <output id="cbO"></output></label><input id="cbN" type="range" min="1" max="12" value="12"></div></div><div style="display:grid;grid-template-columns:2.4fr 1fr;gap:14px;align-items:end"><div id="cbL"></div><div id="cbR"></div></div><div class="stats" id="cbS"></div><div class="read" id="cbT"></div></div>`;
+  const draw=()=>{const n=+$('#cbN',el).value,part=cs.slice(0,n);$('#cbO',el).textContent=n+' of 12 ('+(n*5)+' min)';
+    const agg={o:part[0].o,c:part[n-1].c,h:Math.max(...part.map(k=>k.h)),l:Math.min(...part.map(k=>k.l))},up=agg.c>=agg.o;
+    $('#cbL',el).innerHTML=candleChart({c:cs.map((k,i)=>i<n?k:Object.assign({},k,{cls:'cm'})),w:560,h:290,y:[96,112],alt:'Twelve five-minute candles',pad:{t:14,b:14},a:[{t:'text',i:0,p:112,dy:0,s:'5-minute chart',cls:'k-mute'}]});
+    $$('.cm',el).forEach(g=>{g.style.opacity='.18';g.style.fill='var(--mute)';g.style.stroke='var(--mute)'});
+    $('#cbR',el).innerHTML=candleChart({c:[agg],w:210,h:290,y:[96,112],alt:'The resulting hourly candle',pad:{t:14,b:14,l:30,r:60},a:[{t:'text',i:0,p:112,s:'Hourly candle',cls:'k-mute',anc:'middle'}]});
+    $('#cbS',el).innerHTML=[['Open (first 5m open)',agg.o],['High (highest high)',agg.h],['Low (lowest low)',agg.l],['Close (last 5m close)',agg.c]].map(r=>`<div class="stat"><small>${r[0]}</small><b>${r[1].toFixed(2)}</b></div>`).join('');
+    $('#cbT',el).innerHTML=`This candle is <b>${up?'bullish (up)':'bearish (down)'}</b>. Its body spans ${Math.abs(agg.c-agg.o).toFixed(2)} points while the full range is ${(agg.h-agg.l).toFixed(2)}. Every higher time frame candle is just many smaller candles summarised into four numbers.`};
+  $('#cbN',el).addEventListener('input',draw);draw()};
+PAGES.push({id:'m02',part:'I',n:2,title:'Reading the Chart',min:18,level:'Foundation',src:'Source: lesson "How to Read a Candlestick Chart"',
+lead:'Every concept in this course is drawn on candlesticks. This module makes sure you can read them fluently: anatomy, time frames, swing points and trends.',
+goals:['Set up a clean TradingView chart on Eastern time','Name the four prices every candle records','Explain how a higher time frame candle is built from lower ones','Identify swing highs, swing lows and the direction of a trend'],
+html:`
+<h2>Set up your chart first</h2>
+<p>The instructor uses TradingView because it has the cleanest interface and almost every active day trader uses it. A free account is enough to begin. After signing up, open <em>Supercharts</em> to get a full chart. Then make three changes.</p>
+<ol><li><b>Set the time zone to Eastern Time (New York).</b> Futures index markets run on New York time. Open is 9:30 a.m. Eastern wherever you live. If your chart is in another zone, every session and time rule in this course will land on the wrong candle.</li>
+<li><b>Use neutral candle colours.</b> Green and red tie directly to feelings about winning and losing money, which works against the detachment you want. Blue and black (or white and black) keep candles informational. This course draws up candles in white and down candles in grey for the same reason.</li>
+<li><b>Strip the clutter.</b> A white background, no grid lines and no indicators is enough. Indicators are used later only to mark levels, never to decide trades.</li></ol>
+${TIP('<p>Do not buy a paid plan to start. Free is enough until you know exactly which feature you are missing.</p>')}
+<h2>Anatomy of a candle</h2>
+<p>A Japanese candlestick records four prices for one slice of time: where price <b>opened</b>, the <b>highest</b> price reached, the <b>lowest</b> price reached, and where it <b>closed</b>. The thick part is the <b>body</b> (open to close). The thin lines are <b>wicks</b>, traces left where price travelled but did not finish.</p>
+${F('anatomy','On an up candle the open is the bottom of the body and the close is the top. On a down candle it is reversed. The wicks always show the high and the low.','Candlestick anatomy')}
+<p>Other chart types exist (bars, line, Heikin-Ashi, Renko, footprint). Japanese candles are the standard here because they hold all four prices and make wicks visible, and wicks matter a great deal for liquidity, structure and gaps.</p>
+<h2>Time frames: the same market at different zoom levels</h2>
+<p>The time frame is the amount of time one candle covers. On a daily chart one candle is 24 hours. On a 5-minute chart each candle is 5 minutes. A 1-hour candle is just twelve 5-minute candles compressed. Use the builder below and watch the four numbers of the hourly candle change as more small candles are included.</p>
+${W_('candleBuilder')}
+<p>You will use several time frames together: higher ones (4-hour, 1-hour) to see direction and major levels, lower ones (15-minute, 5-minute, 1-minute) to time entries. The same patterns appear on all of them.</p>
+<h2>Swing highs, swing lows and trends</h2>
+<p>A <b>swing high</b> is a peak: a candle whose high is above the highs on either side. A <b>swing low</b> is the matching trough. A trend is nothing more than the sequence of those swings.</p>
+${F2('trendUp','trendDown','Follow the swing points, not individual candles. Uptrends step up, downtrends step down. Each label marks the swing relative to the one before it.','Uptrend: higher highs (HH) and higher lows (HL)','Downtrend: lower highs (LH) and lower lows (LL)','Market structure')}
+<p>When swings stop stepping in one direction the trend is in question. That is the subject of Module 5 (break of structure). For now your homework is to scroll through any chart, mark every swing high and low, and label the trend. Do it on three time frames.</p>
+${WARN('<p>Reading a trend from the last two or three candles. Always zoom out until you can see at least three swing points on the same side.</p>')}`,
+recap:['Set TradingView to Eastern Time. Keep the chart clean and neutral.','A candle = open, high, low, close. Body shows open to close, wicks show the extremes.','Higher time frame candles summarise lower ones. Use several time frames together.','Swing highs and lows define trends: HH+HL is up, LH+LL is down.']});
+QZ.m02=[
+{q:'On a down candle, which part of the body is the open?',o:['Bottom','Top','Lower wick tip','It depends on the time frame'],a:1,w:'A down candle opens high and closes lower, so the top of the body is the open.'},
+{q:'You are in Brazil. At what time should the market open appear on your chart?',o:['9:30 in your local time','9:30 Eastern, if the chart is set to New York time','10:30','It varies by day'],a:1,w:'Charts must be set to Eastern time so that session times match the strategy rules.'},
+{q:'A 1-hour candle contains how many 5-minute candles?',o:['6','12','24','60'],a:1,w:'60 minutes / 5 minutes = 12.'},
+{q:'Which sequence describes an uptrend?',o:['Lower highs, lower lows','Higher highs, higher lows','Equal highs, equal lows','Higher highs, lower lows'],a:1,w:'Uptrends step upward: each swing high and swing low is above the previous one.'}];
+
+/* ================= MODULE 3 ================= */
+FIG.liqwho=()=>{const c=chain(100,[103,106,109,112,115,117,114,111,108,106,109,112,115,116.5],5);
+  return candleChart({c,w:760,h:380,y:[94,128],alt:'Resting orders above a swing high and below a swing low',a:[
+  {t:'zone',i1:5,i2:13,p1:'h5',p2:'h5+7',cls:'k-liq',s:'BUY-SIDE LIQUIDITY\nresting buy orders: stop-losses of shorts + breakout buyers',la:'tl'},
+  {t:'zone',i1:9,i2:13,p1:'l9',p2:'l9-7',cls:'k-liq',s:'SELL-SIDE LIQUIDITY\nstop-losses of longs\n+ breakout sellers',la:'bl'},
+  {t:'dot',i:5,p:'h5',cls:'k-blue',s:'swing high',dx:-9,anc:'end',dy:-4},{t:'dot',i:9,p:'l9',cls:'k-blue',s:'swing low',dx:-9,anc:'end',dy:16}]})};
+FIG.sweepRev=()=>{const c=chain(100,[103,106,109,112,114,113,[113.5,5.5,.8],111,108,105,102,99],9);
+  return candleChart({c,w:520,h:330,y:[94,124],alt:'Sweep followed by reversal',a:[{t:'hline',p:'h4',i1:4,i2:7,cls:'k-liq'},
+  {t:'tag',i:6,p:'h6',dy:-8,s:'SWEEP',cls:'k-liq',anc:'middle'},{t:'arrow',i1:6.5,p1:'h6',i2:10,p2:'c10',cls:'k-bad',s:'reverses',dx:14}]})};
+FIG.sweepCont=()=>{const c=chain(100,[103,106,109,112,114,113,[116,5.5,.8],118,121,124,127,130],9);
+  return candleChart({c,w:520,h:330,y:[94,138],alt:'Sweep followed by continuation',a:[{t:'hline',p:'h4',i1:4,i2:7,cls:'k-liq'},
+  {t:'tag',i:6,p:'h6',dy:-8,s:'SWEEP',cls:'k-liq',anc:'middle'},{t:'arrow',i1:7,p1:'c7',i2:11,p2:'h11+2',cls:'k-good',s:'keeps going',dx:-62,dy:34}]})};
+PAGES.push({id:'m03',part:'II',n:3,title:'Liquidity Explained',min:20,level:'Core concept',src:'Source: lesson "Liquidity Explained"',
+lead:'Liquidity is the centre of this whole approach. If you understand who is waiting where, price movement stops looking random.',
+goals:['Define liquidity as resting orders and say exactly where it sits','Explain why large players need counterparties and where they find them','Describe a liquidity sweep and why it is only an opportunity','Avoid entering blindly at every high or low'],
+html:`
+<h2>What liquidity actually is</h2>
+<p>Liquidity is the set of orders waiting in the market: buy stops, sell stops, buy limits and sell limits. Price only moves when orders are executed. If nobody trades, price stays flat. So the key question at any moment is: <em>where are the orders, and who is likely to trigger them?</em></p>
+${DEF('Definition','<p><b>Liquidity</b> = resting orders sitting above and below price. Where orders cluster, price is drawn to them, because that is where large positions can be filled.</p>')}
+<h2>Where the orders sit</h2>
+<p>Look at any obvious swing high. Two groups have resting <b>buy</b> orders just above it:</p>
+<ol><li><b>Breakout buyers.</b> Traders who plan to buy when price breaks above the old high.</li>
+<li><b>Short sellers' stop-losses.</b> Anyone who shorted during the fall from that high placed a protective stop above it, and a stop on a short is a buy order.</li></ol>
+<p>Below any obvious swing low the mirror image exists: breakout sellers, and the stop-losses of traders who bought during the rise (a stop on a long is a sell order). Highs and lows are not just numbers on a chart. They are stacks of pending orders.</p>
+${F('liqwho','Every clear swing high holds a pool of buy orders above it, and every clear swing low holds a pool of sell orders below it.','Where resting orders live')}
+<h2>Why large players hunt these pools</h2>
+<p>An order only fills if someone takes the other side. A retail trader can buy 1 contract almost anywhere. A large institution that needs to buy thousands cannot simply click: it would push the price up against itself (slippage). To buy big, it needs a big pool of sellers. Where is the biggest pool of sellers? Below the lows. To sell big, it needs buyers, and the biggest pool of buyers is above the highs.</p>
+${steps([['Retail view','Breakouts','Price above the high looks bullish, so buy. Price below the low looks bearish, so sell.'],['Large-player need','Counterparties','To sell a huge position it needs lots of buyers at one price.'],['The result','Sweep','Price is pushed through the high to trigger those buyers, filling the big seller, and may then fall.']])}
+<p>This is the "reverse psychology" of the market: the obvious breakout is often the moment the big order is being filled on the other side.</p>
+<h2>The liquidity sweep</h2>
+<p>A <b>sweep</b> (also called a stop run or manipulation) is a push through a swing high or low that activates the resting orders there. After a sweep, price may reverse sharply, or it may keep going. The sweep itself only tells you that a big opportunity to fill orders existed.</p>
+${F2('sweepRev','sweepCont','The same sweep, two outcomes. On the left, price takes the high and reverses. On the right, it takes the high and continues up.','Outcome A: reversal','Outcome B: continuation','A sweep is an opportunity, not a signal')}
+${KEY('<p>Liquidity gives price the <b>opportunity</b> to reverse. It never promises a reversal. You need further evidence that the opportunity was actually taken, which is what the next modules teach.</p>')}
+${WARN('<p>Placing a limit sell above every high and a limit buy below every low. Price often sweeps a level and keeps trending, and blind entries turn into heavy drawdowns. Wait for confirmation.</p>')}
+<h2>Invalidation points and why they matter</h2>
+<p>In an uptrend the previous swing low is where the trend is "invalidated": below it, structure has shifted. Beginners place stops exactly there, which is why those lows are packed with sell orders. Knowing where the crowd puts stops tells you where price is being drawn.</p>
+<h2>Marking liquidity: a repeatable routine</h2>
+<ol><li>Find the clear swing highs and swing lows on the chart.</li><li>Mark buy-side liquidity above highs and sell-side below lows.</li><li>Watch how price interacts with the level. Does it pierce and close back, or accept beyond?</li><li>Look for signs that large orders were absorbed (Modules 5 to 9).</li><li>Only then consider an entry. Entries, stops and targets come later in the course.</li></ol>`,
+recap:['Liquidity = resting orders. Buy orders above highs, sell orders below lows.','Highs hold breakout buyers plus the stops of shorts. Lows hold breakout sellers plus the stops of longs.','Large players need counterparties, so they target the biggest pools.','A sweep is an opportunity to reverse, not a guarantee. Never fade every high or low blindly.']});
+QZ.m03=[
+{q:'A trader is short from lower prices with a stop above a swing high. When price hits that stop, what order executes?',o:['A sell order','A buy order','A limit sell','Nothing, stops do not execute'],a:1,w:'Closing a short means buying. A stop-loss on a short is therefore a buy order resting above the high.'},
+{q:'Why would a large buyer want price to move below an obvious low?',o:['To scare the market','Because the pool of sell orders there lets them fill a large buy without much slippage','Because lows are always the end of the trend','It does not, they only buy breakouts'],a:1,w:'Sell orders below lows are the counterparties the buyer needs.'},
+{q:'After price sweeps a high, what is the correct interpretation?',o:['Price must reverse now','Price must continue up','The opportunity to fill orders existed, direction still needs confirmation','The high is invalid'],a:2,w:'A sweep offers an opportunity. It does not confirm what price will do next.'},
+{q:'What is wrong with placing a limit sell above every high?',o:['Nothing, highs always reverse','Price often sweeps and keeps trending, so you take avoidable losses','Limit orders are not allowed','It requires too much margin'],a:1,w:'Without confirmation you will be fading real breakouts as often as sweeps.'}];
+
+/* ================= MODULE 4 ================= */
+FIG.sessionDay=()=>{const c=chain(103.5,[105,106.5,[107.5,1.2,.7],106,104.5,[102,.7,1.3],103.5,105,104,105, 102.5,[99.5,.8,1.8],100.5,103.5,106.5,[109,1.2,.8],110.5,112,110.5,111.5,[113,1,.6], 112,111,112.5,[114.5,1.8,.6],112.5,109.5,106.5,103.5,100.5,[97.5,.6,1.5],98.5,97],4);
+  return candleChart({c,w:780,h:400,y:[92,122],alt:'A day showing money shifting from session to session',a:[
+  {t:'zone',i1:0,i2:9,p1:'B',p2:'T',band:1,cls:'k-blue',s:'ASIA  18:00-03:00',la:'tl'},{t:'zone',i1:10,i2:20,p1:'B',p2:'T',band:1,cls:'k-liq',s:'LONDON  03:00-08:30',la:'tl'},{t:'zone',i1:21,i2:32,p1:'B',p2:'T',band:1,cls:'k-good',s:'NEW YORK  08:30 pre / 09:30 open',la:'tl'},
+  {t:'hline',p:'h2',i1:2,i2:22,cls:'k-blue'},{t:'hline',p:'l5',i1:5,i2:22,cls:'k-blue'},{t:'hline',p:'h20',i1:20,i2:32,cls:'k-liq'},{t:'hline',p:'l11',i1:11,i2:32,cls:'k-liq'},
+  {t:'text',i:20,p:'h2',dy:16,s:'Asia high',cls:'k-blue',anc:'middle'},{t:'text',i:18,p:'l5',dy:-6,s:'Asia low',cls:'k-blue',anc:'middle'},{t:'text',i:28,p:'h20',dy:-7,s:'London high',cls:'k-liq',anc:'middle'},{t:'text',i:20,p:'l11',dy:17,s:'London low',cls:'k-liq',anc:'middle'},
+  {t:'dot',i:11,p:'l11',cls:'k-bad',s:'sweeps Asia low',dx:-9,anc:'end',dy:12},{t:'dot',i:15,p:'h15',cls:'k-bad',s:'sweeps Asia high',dx:-9,anc:'end',dy:-4},{t:'dot',i:24,p:'h24',cls:'k-bad',s:'sweeps London high',dx:-9,anc:'end',dy:-4},{t:'dot',i:30,p:'l30',cls:'k-bad',s:'sweeps London low',dx:-9,anc:'end',dy:16},
+  {t:'arrow',i1:12,p1:'c12',i2:14.6,p2:'h15-.6',cls:'k-good'},{t:'arrow',i1:25,p1:'h24-1',i2:29.4,p2:'l30+2',cls:'k-bad',s:'NY targets\nLondon low',anc:'end',dx:-26,dy:-8}]})};
+FIG.pdhl=()=>{const c=chain(101,[103,[100.5,.8,1.2],103,106,108.5,[111,1,.7],[110,.8,.8],108,106.5,107.5,108.5, 109.5,111,[113.5,2.2,.6],111,107,103,100,[98,.6,1.4],99],6);
+  return candleChart({c,w:760,h:360,y:[92,120],alt:'Previous day high and low as liquidity',a:[
+  {t:'zone',i1:0,i2:10,p1:'B',p2:'T',band:1,cls:'k-blue',s:'PREVIOUS DAY',la:'tl'},{t:'zone',i1:11,i2:19,p1:'B',p2:'T',band:1,cls:'k-good',s:'TODAY',la:'tl'},
+  {t:'hline',p:'h5',i1:5,i2:19,cls:'k-liq'},{t:'hline',p:'l1',i1:1,i2:19,cls:'k-liq'},
+  {t:'text',i:2,p:'h5',dy:-7,s:'Previous day high (PDH)',cls:'k-liq',anc:'middle'},{t:'text',i:7,p:'l1',dy:17,s:'Previous day low (PDL)',cls:'k-liq',anc:'middle'},
+  {t:'dot',i:13,p:'h13',cls:'k-bad',s:'sweeps PDH',dx:-9,anc:'end',dy:-4},{t:'dot',i:18,p:'l18',cls:'k-bad',s:'sweeps PDL',dx:-9,anc:'end',dy:14},{t:'arrow',i1:13.4,p1:'h13-1',i2:17.7,p2:'l18+1.5',cls:'k-bad'}]})};
+FIG.lowres=()=>{const c=chain(100,[102,105,108,106,104,103,107,111,114,112,109,108,112,116,120,118,115,113,118,122,126,[126.5,4.5,.8],122,117,111,106,101],3);
+  return candleChart({c,w:780,h:400,y:[94,138],alt:'Stacked lows swept in sequence',a:[
+  {t:'hline',p:'l17',i1:17,i2:24,cls:'k-liq'},{t:'hline',p:'l11',i1:11,i2:25,cls:'k-liq'},{t:'hline',p:'l5',i1:5,i2:26,cls:'k-liq'},
+  {t:'dot',i:17,p:'l17',cls:'k-liq',s:'low 3',dy:17,dx:0,anc:'middle'},{t:'dot',i:11,p:'l11',cls:'k-liq',s:'low 2',dy:17,dx:0,anc:'middle'},{t:'dot',i:5,p:'l5',cls:'k-liq',s:'low 1',dy:17,dx:0,anc:'middle'},
+  {t:'tag',i:21,p:'h21',dy:-9,s:'SWEEP the high (entry area)',cls:'k-bad',anc:'middle'},{t:'arrow',i1:21.5,p1:'h21-3',i2:26,p2:'l26+1',cls:'k-bad',s:'each stacked low\nis another pool',dx:20,dy:-10}]})};
+FIG.eqh=()=>{const c=chain(100,[104,108,111,113,[114,1,.8],111,108,106,109,112,[114,1,.8],113,[112,6,.5],108,104,101],4);
+  return candleChart({c,w:760,h:360,y:[96,127],alt:'Equal highs',a:[
+  {t:'zone',i1:4,i2:13,p1:115,p2:122,cls:'k-liq',s:'two sets of buy orders at one price:\nstops of both pullbacks + breakout buyers',la:'tl'},{t:'hline',p:115,i1:4,i2:13,cls:'k-liq',s:'equal highs'},
+  {t:'dot',i:12,p:'h12',cls:'k-bad',s:'sweep',dx:12,dy:-2},{t:'arrow',i1:12.4,p1:'h12-1',i2:15,p2:'l15+1',cls:'k-bad'}]})};
+FIG.newsdl=()=>{const c=chain(100,[100.4,99.8,100.3,100.1,100.5,[102,6,4],101,102,103,104.2,105.2,[106.6,2,.8],104,101,98,[96,.6,1.5]],8);
+  return candleChart({c,w:760,h:360,y:[90,114],alt:'High and low of a news candle used as liquidity',a:[
+  {t:'tag',i:5,p:'h5',dy:-10,s:'8:30 NEWS CANDLE',cls:'k-ink',anc:'middle'},
+  {t:'hline',p:'h5',i1:5,i2:12,cls:'k-liq'},{t:'hline',p:'l5',i1:5,i2:15,cls:'k-liq'},{t:'text',i:9,p:'h5',dy:-7,s:'data high',cls:'k-liq',anc:'middle'},{t:'text',i:11,p:'l5',dy:-7,s:'data low',cls:'k-liq',anc:'middle'},
+  {t:'dot',i:11,p:'h11',cls:'k-bad',s:'sweeps data high',dx:-9,anc:'end',dy:-4},{t:'dot',i:15,p:'l15',cls:'k-bad',s:'collects data low',dx:-9,anc:'end',dy:14}]})};
+WID.sessions=el=>{
+  const SEG=[{n:'Asia',a:0,b:540,c:'var(--blue)',d:'First session of the trading day (18:00 to 03:00 ET). Often builds the first range. Its high and low become targets for London.'},
+  {n:'London',a:540,b:870,c:'var(--liq)',d:'Opens 03:00 ET. London money often sweeps one side of the Asia range, then drives toward the other. (The pre-market opens at 02:00.)'},
+  {n:'NY pre-market',a:870,b:930,c:'var(--ink2)',d:'08:30 to 09:30 ET. US traders arrive and pre-market manipulation is common. Also when much economic data prints (8:30).'},
+  {n:'New York',a:930,b:1380,c:'var(--good)',d:'Cash open at 09:30 ET through 17:00. The session this course trades. New money arrives, so expect a sweep of London or Asia levels.'},
+  {n:'Spread hour',a:1380,b:1440,c:'var(--mute)',d:'17:00 to 18:00 ET. Markets are closed or very thin. On CFD/forex brokers spreads widen sharply. Do not trade.'}];
+  const note=m=>{if(m>=930&&m<950)return'MANIPULATION WINDOW (09:30 to 09:50): expect price to sweep a nearby level, often one side of the opening range.';
+    if(m>=950&&m<970)return'ENTRY WINDOW (09:50 to 10:10): the ideal time to look for an entry once the sweep is done.';
+    if(m>=970&&m<990)return'LATE ENTRY (10:10 to 10:30): still possible, but the day is slowing down.';
+    if(m>=990&&m<1140)return'AFTER 10:30: the instructor stops looking if no trade has appeared. Volume tends to fade.';
+    if(m>=1140&&m<1380)return'PM session begins about 13:00. The instructor does not trade it, but it exists.';return''};
+  el.innerHTML=`<div class="wid-h">Session clock (Eastern Time)<span>Interactive</span></div><div class="wid-b"><div style="position:relative;height:58px;border-radius:8px;overflow:hidden;border:1px solid var(--line)" id="scBar"></div>
+  <div style="position:relative;height:24px;font:500 11px var(--f-mono);color:var(--mute)" id="scTicks"></div>
+  <div class="ctl" style="margin-top:6px"><div style="grid-column:1/-1"><label for="scR">Drag through the day (day starts 18:00 ET) <output id="scO"></output></label><input id="scR" type="range" min="0" max="1439" value="930"></div></div><div class="read" id="scT"></div></div>`;
+  $('#scBar',el).innerHTML=SEG.map(s=>`<div title="${s.n}" style="position:absolute;left:${s.a/14.4}%;width:${(s.b-s.a)/14.4}%;top:0;bottom:0;background:color-mix(in srgb,${s.c} 30%,var(--panel));border-right:1px solid var(--line);display:grid;place-items:center;font:600 12px var(--f-body);color:var(--ink);overflow:hidden;white-space:nowrap">${(s.b-s.a)>100?s.n:''}</div>`).join('')+`<div id="scM" style="position:absolute;top:0;bottom:0;width:3px;background:var(--ink);box-shadow:0 0 0 2px var(--panel)"></div><div style="position:absolute;left:${930/14.4}%;width:${60/14.4}%;bottom:0;height:7px;background:var(--liq)" title="09:30 to 10:30 key hour"></div>`;
+  $('#scTicks',el).innerHTML=[0,360,540,870,930,1140,1380].map((m,i)=>{const t=(18*60+m)%1440,l=`${String(Math.floor(t/60)).padStart(2,'0')}:${String(t%60).padStart(2,'0')}`;return`<span style="position:absolute;left:${m/14.4}%;transform:translateX(${i===6?'-100%':i===0?'0':'-50%'});top:5px">${l}</span>`}).join('');
+  const upd=()=>{const v=+$('#scR',el).value,t=(18*60+v)%1440,l=`${String(Math.floor(t/60)).padStart(2,'0')}:${String(t%60).padStart(2,'0')}`;$('#scO',el).textContent=l+' ET';$('#scM',el).style.left=(v/14.4)+'%';
+    const s=SEG.find(s=>v>=s.a&&v<s.b);$('#scT',el).innerHTML=`<b>${s.n}.</b> ${s.d}${note(v)?`<br><br><b style="color:var(--liq-ink)">${note(v)}</b>`:''}`};
+  $('#scR',el).addEventListener('input',upd);upd()};
+PAGES.push({id:'m04',part:'II',n:4,title:'Advanced Liquidity Concepts',min:26,level:'Core concept',src:'Source: lesson "Advanced Liquidity Concepts"',
+lead:'Not every high and low is equally important. This module ranks the draws on liquidity so you know which ones price is most likely to reach for, and use them as both entries and targets.',
+goals:['Mark the Asia, London and New York session highs and lows on Eastern time','Use previous day high and low as higher-probability levels','Recognise stacked ("low resistance") and equal highs and lows','Use news candle highs and lows as liquidity'],
+html:`
+<p>In the last module you learned that liquidity sits above highs and below lows. A chart has dozens of highs and lows, so which ones matter? The course gives you five families. Each can be an <b>entry</b> (where a sweep may start a reversal) or a <b>target</b> (where an open position can be closed because many orders wait there).</p>
+${tbl(['#','Draw on liquidity','Why it is stronger'],[['1','Session highs and lows','New money from a new region arrives each session'],['2','Previous day high and low','All three sessions combined into one level'],['3','Low resistance (stacked) highs/lows','Several untouched pools in a row'],['4','Relative equal highs/lows','Two sets of orders at one price'],['5','News (data) highs/lows','Volatile candle edges after scheduled data']])}
+<h2>1. Session highs and lows</h2>
+<p>The 24-hour day splits into three sessions, each driven by traders in a different region. When a new session opens, new money enters. That money often targets the highs and lows the previous session just created, because they hold resting orders. Set your chart to Eastern time and use these windows.</p>
+${W_('sessions')}
+<p>A typical sequence: Asia builds a range. London opens and pushes below the Asia low to fill buy orders, then rallies and takes the Asia high where it can sell. New York then arrives, pushes above the London high, and heads for the London low. It does not happen every day, but when it does the map is clear.</p>
+${F('sessionDay','Illustrative day. Each new session sweeps the extreme of the previous session before heading for the other side. Red dots mark the sweeps; arrows show the delivery that followed.','Money shifting session to session')}
+${TIP('<p>Use a session indicator (many are free on TradingView) to draw session highs and lows automatically, then always verify the session start times against the table above.</p>')}
+<h2>2. Previous day high and low</h2>
+<p>The previous day high (PDH) is simply the highest point of all three sessions combined, and the previous day low (PDL) the lowest. They are the same idea scaled up, and they are watched by almost everyone.</p>
+${F('pdhl','Today pushes above PDH, takes the buy orders there, and then delivers to PDL. This is a pattern, not a rule: do not press sell every time price touches PDH.','Previous day levels')}
+<h2>3. Low resistance liquidity: the cookie jar</h2>
+<p>When a trend leaves several swing lows (or highs) stacked in a row and untouched, each one is another pool. Once a large player has sold into a sweep at the top, there is no reason to stop at the first low. Every stacked low is another jar of cookies, and the market is greedy.</p>
+${F('lowres','Three stacked lows below a swept high. The decline runs through all of them. The same structure inverted works for stacked highs in a downtrend.','Stacked highs and lows')}
+<p>These also work in reverse. If price has just run through a stack of lows, a lot of sell orders have been filled. That fuel can power a rise, which is why stacked levels serve as entries <em>and</em> as exits.</p>
+<h2>4. Relative equal highs and lows</h2>
+<p>When two highs sit at the same price (or within a few ticks), the buy orders above them are doubled: stops of traders who shorted from each peak, plus breakout buyers waiting on the line. That makes equal highs and lows especially attractive to sweep.</p>
+${F('eqh','Two peaks at one price (115). One sweep captures both sets of orders.','Equal highs')}
+<h2>5. News data highs and lows</h2>
+<p>Scheduled economic reports (CPI, PPI, jobless claims, FOMC) cause violent candles, mostly at 8:30 a.m. Eastern. The high and low of that candle become liquidity for the rest of the day. Use a free economic calendar and look for the red-folder (high impact) events.</p>
+${F('newsdl','The edges of the 8:30 news candle act like any other high and low. Here the data high is swept, then the data low is taken.','News candle as liquidity')}
+${WARN('<p>Treating any of these levels as a trigger by itself. "Price touched PDH, so I sell" is the same blind entry as before. A level only gives the opportunity. Confirmation comes from the next modules.</p>')}
+<h2>Homework</h2>
+<ul><li>Mark Asia, London and New York highs and lows for the last 10 trading days.</li><li>For each day note which one was swept first and where price went afterward.</li><li>Repeat for previous day high/low, equal highs/lows and two news days.</li></ul>`,
+recap:['Rank draws on liquidity: sessions, previous day, stacked, equal, news.','Session times (ET): Asia 18:00-03:00, London 03:00-08:30, New York 08:30 pre / 09:30 open.','New sessions tend to sweep the previous session, then head for the opposite extreme.','Stacked or equal levels hold more orders and attract price harder.','Every level is both an entry area and a target. None is a standalone signal.']});
+QZ.m04=[
+{q:'London session runs from:',o:['18:00 to 03:00 ET','03:00 to 08:30 ET','09:30 to 17:00 ET','08:30 to 09:30 ET'],a:1,w:'London is 03:00 to 08:30 ET, ending where New York pre-market begins.'},
+{q:'Why are relative equal highs attractive to price?',o:['They are rare','They hold two sets of buy orders at essentially one price','They always reverse','Because they are formed in Asia'],a:1,w:'Stops of shorts from both peaks plus breakout buyers stack at the same level.'},
+{q:'Asia swept its low, then London took the Asia high. New York opens. A reasonable expectation is:',o:['New York ignores prior levels','New York may sweep the London high and then target London or Asia lows','Price will go straight up','The market is closed'],a:1,w:'This is the "money shifts session to session" pattern. It is a probability, not a certainty.'},
+{q:'Where does the instructor look for news data liquidity?',o:['The high and low of the high-impact news candle','The previous week low','The 200 moving average','Only the Asia range'],a:0,w:'The highs and lows of the news candle behave like other draws on liquidity.'},
+{q:'The spread hour is:',o:['09:30 to 10:30 ET','17:00 to 18:00 ET','03:00 to 04:00 ET','13:00 to 14:00 ET'],a:1,w:'Between the end of the New York session at 17:00 and the new day at 18:00, liquidity is thin and spreads widen.'}];
+</script>
+<script>
+/* ================= MODULE 5: BREAK OF STRUCTURE ================= */
+FIG.bosSweep=()=>{const c=chain(100,[102,105,108,106,104,107,110,112.5,110,108.5,[113,3,.8],110.5,106.8,104.5,106,103],5);
+  return candleChart({c,w:780,h:380,y:[96,122],alt:'Sweep of a high followed by a bearish break of structure',a:[
+  {t:'hline',p:'h7',i1:7,i2:10,cls:'k-liq',s:'old high',la:'l'},
+  {t:'hline',p:'l9',i1:9,i2:12,cls:'k-bad'},{t:'text',i:9.6,p:'l9',dy:17,s:'most recent low (the line to beat)',cls:'k-bad',anc:'start'},
+  {t:'tag',i:10,p:'h10',dy:-9,s:'1  SWEEP',cls:'k-liq',anc:'middle'},{t:'tag',i:12,p:'l12',dy:26,s:'2  CLOSE BELOW = BOS',cls:'k-bad',anc:'middle'},
+  {t:'arrow',i1:12.4,p1:'l12-.5',i2:15,p2:'l15+1',cls:'k-bad',s:'new downtrend',dx:6,dy:20}]})};
+FIG.bosBull=()=>{const c=flip(chain(100,[102,105,108,106,104,107,110,112.5,110,108.5,[113,3,.8],110.5,106.8,104.5,106,103],5),108);
+  return candleChart({c,w:780,h:380,y:[94,120],alt:'Sweep of a low followed by a bullish break of structure',a:[
+  {t:'hline',p:'l7',i1:7,i2:10,cls:'k-liq',s:'old low',la:'l',below:1},
+  {t:'hline',p:'h9',i1:9,i2:12,cls:'k-bad'},{t:'text',i:9.6,p:'h9',dy:-7,s:'most recent high (the line to beat)',cls:'k-bad'},
+  {t:'tag',i:10,p:'l10',dy:26,s:'1  SWEEP',cls:'k-liq',anc:'middle'},{t:'tag',i:12,p:'h12',dy:-9,s:'2  CLOSE ABOVE = BOS',cls:'k-good',anc:'middle'},
+  {t:'arrow',i1:12.4,p1:'h12+.5',i2:15,p2:'h15-1',cls:'k-good',s:'new uptrend',dx:6,dy:-14}]})};
+WID.bosTest=el=>{
+  const base=chain(100,[104,108,105,102,106,110,114,111,108.2],5),L=base[8].l;
+  el.innerHTML=`<div class="wid-h">Wick or close? Test the break<span>Interactive</span></div><div class="wid-b"><div class="ctl"><div style="grid-column:1/-1"><label for="bosR">Where does the next candle CLOSE? (its wick always pokes 2 points below the line) <output id="bosO"></output></label><input id="bosR" type="range" min="-35" max="35" value="12"></div></div><div id="bosC"></div><div class="read" id="bosT"></div></div>`;
+  const draw=()=>{const v=+$('#bosR',el).value/10,c=L+v,o=108.2,k={o,c,h:Math.max(o,c)+.6,l:Math.min(c,L-2)-.2},below=c<L;
+    $('#bosO',el).textContent=(v>=0?'+':'')+v.toFixed(1)+' vs line';
+    $('#bosC',el).innerHTML=candleChart({c:[...base,k],w:760,h:300,y:[96,118],alt:'Candle testing the most recent low',a:[{t:'hline',p:L,i1:8,i2:9,cls:'k-bad',s:'most recent low',la:'l'}]});
+    $('#bosT',el).innerHTML=below?`<b style="color:var(--bad)">Structure broken.</b> The body closed ${Math.abs(v).toFixed(1)} below the most recent low. Bullish market structure has shifted: this is a break of structure (BOS).`:`<b style="color:var(--good)">Structure intact.</b> Price wicked below the line but the candle closed ${v.toFixed(1)} above it. A wick is not a break. The uptrend is still valid, and you may just have witnessed a sweep.`};
+  $('#bosR',el).addEventListener('input',draw);draw()};
+PAGES.push({id:'m05',part:'III',n:5,title:'Break of Structure',min:16,level:'Core concept',src:'Source: lesson "Break of Structure Explained"',
+lead:'Liquidity tells you where orders may be filled. Break of structure tells you whether they actually were. It is the first and simplest confirmation tool.',
+goals:['Define bullish and bearish market structure precisely','Identify which swing point to monitor at any moment','Distinguish a wick through a level from a true candle close','Explain how a break of structure confirms a liquidity sweep'],
+html:`
+<h2>Market structure in one paragraph</h2>
+<p>An uptrend is a series of higher highs and higher lows; that is <b>bullish market structure</b>. A downtrend is lower highs and lower lows; <b>bearish market structure</b>. A <b>break of structure (BOS)</b> is the moment the current structure fails: the market stops doing what it has been doing and starts doing the opposite.</p>
+<h2>The rule</h2>
+${KEY('<p><b>To break bullish structure</b> a candle must <b>close</b> below the <b>most recent swing low</b>. <b>To break bearish structure</b> a candle must <b>close</b> above the <b>most recent swing high</b>.<br>Wicks do not count. Older swings do not count. Only the most recent one in the trend counts.</p>')}
+<p>Think of it as monitoring one line at a time. In an uptrend you watch the latest low (highs do not matter for breaking). In a downtrend you watch the latest high. When the monitored swing is replaced by a new one, the line moves with it.</p>
+${W_('bosTest')}
+<h2>Seeing it on a chart</h2>
+${F2('bosSweep','bosBull','A sweep of liquidity (step 1) followed by a candle close beyond the most recent opposite swing (step 2). The left example breaks down, the right example breaks up.','Bearish BOS after a high is swept','Bullish BOS after a low is swept','Sweep + break of structure')}
+<h2>Common traps</h2>
+<ul><li><b>Lower high alone.</b> In an uptrend, one lower high is not a break. You are only watching lows for a bearish break.</li>
+<li><b>Using the wrong low.</b> A drastically lower low whose candle did not <em>close</em> beyond the monitored low is still not a break. Keep monitoring.</li>
+<li><b>Closing exactly at the line.</b> If the body only equals the level, it is not a close below. Wait for a candle that clearly closes beyond.</li></ul>
+${WARN('<p>Selling the instant a wick pokes through a low. The moment before a real BOS often looks identical to a sweep. The candle close is the filter.</p>')}
+<h2>Where it fits in the strategy</h2>
+<p>Here is the logic in the instructor's own sequence. Liquidity gives the <em>opportunity</em> for orders to be filled. A BOS on a lower time frame is the <em>confirmation</em> that they were filled: after taking a high, the market changed from making higher lows to breaking one. That is why the lesson calls it a <b>confirmation confluence</b>.</p>
+<p>It is still not a trade on its own. The new trend might be only a retrace inside a bigger move, so you also want proof that the new direction continues. That is the job of the next confluences.</p>`,
+recap:['Bullish structure = HH + HL. Bearish = LH + LL.','A BOS needs a candle CLOSE beyond the most recent swing in the trend. Wicks do not count.','In an uptrend monitor the latest low. In a downtrend monitor the latest high.','BOS is a confirmation confluence: it confirms orders were filled after a sweep.','It is never a trade by itself.']});
+QZ.m05=[
+{q:'Price is in an uptrend. A candle wicks 3 points below the most recent low but closes above it. What happened?',o:['A BOS','Structure is intact; this was likely a sweep','The trend reversed','The low was invalid'],a:1,w:'Only a candle close beyond the swing breaks structure.'},
+{q:'In a downtrend, which swing do you monitor for a bullish BOS?',o:['Any old high','The most recent high','The most recent low','The 50% level'],a:1,w:'A bullish break needs a close above the most recent swing high of the downtrend.'},
+{q:'Why does the instructor call BOS a "confirmation confluence"?',o:['It confirms that price will continue forever','It confirms that orders were filled, since the market changed direction after the sweep','It is guaranteed to win','It confirms news data'],a:1,w:'A sweep is only an opportunity. BOS shows the market actually turned.'},
+{q:'In an uptrend, price makes one lower high. Has structure broken?',o:['Yes, always','No. Only a close below the most recent low breaks bullish structure','Yes, if volume is high','Only on the daily chart'],a:1,w:'You monitor lows to break an uptrend.'}];
+
+/* ================= MODULE 6: FAIR VALUE GAPS ================= */
+const _fvg=()=>[...chain(100,[100.6,100.2,100.9],2),K(100.9,101.2,.9,.8),K(101.2,110,.5,.3),K(110,111,1,2.2),K(111,107.2,.8,1.4),K(107.2,111,.6,.8),K(111,115,.6,.8),K(115,118,1,.8)];
+FIG.fvgBull=()=>candleChart({c:_fvg(),w:520,h:360,y:[96,124],alt:'Bullish fair value gap',a:[
+  {t:'zone',i1:3,i2:9,p1:'h3',p2:'l5',cls:'k-blue',s:'BULLISH FVG',la:'br'},
+  {t:'text',i:3,p:'h3',dy:-8,s:'1',cls:'k-ink',anc:'middle',big:1},{t:'text',i:4,p:'h4',dy:-8,s:'2',cls:'k-ink',anc:'middle',big:1},{t:'text',i:5,p:'h5',dy:-8,s:'3',cls:'k-ink',anc:'middle',big:1},
+  {t:'dot',i:6,p:'l6',cls:'k-liq',s:'retrace into gap',dx:-9,anc:'end',dy:14},{t:'arrow',i1:7.3,p1:'c7',i2:9,p2:'h9+2',cls:'k-good'}]});
+FIG.fvgBear=()=>candleChart({c:flip(_fvg(),106),w:520,h:360,y:[88,116],alt:'Bearish fair value gap',a:[
+  {t:'zone',i1:3,i2:9,p1:'l3',p2:'h5',cls:'k-blue',s:'BEARISH FVG',la:'tr'},
+  {t:'text',i:3,p:'l3',dy:19,s:'1',cls:'k-ink',anc:'middle',big:1},{t:'text',i:4,p:'l4',dy:19,s:'2',cls:'k-ink',anc:'middle',big:1},{t:'text',i:5,p:'l5',dy:19,s:'3',cls:'k-ink',anc:'middle',big:1},
+  {t:'dot',i:6,p:'h6',cls:'k-liq',s:'retrace into gap',dx:-9,anc:'end',dy:-3},{t:'arrow',i1:7.3,p1:'c7',i2:9,p2:'l9-2',cls:'k-bad'}]});
+FIG.fvgNot=()=>{const c=[...chain(100,[100.4,100.1],2),K(100.1,104,1,1),K(104,110,.5,.3),K(110,108,1,5),K(108,112,.5,.5),K(112,114.5,.7,.5)];
+  return candleChart({c,w:700,h:340,y:[96,120],alt:'Overlapping wicks are not a fair value gap',a:[{t:'zone',i1:2,i2:4,p1:'l4',p2:'h2',cls:'k-bad',s:'wicks overlap:\nnothing is missing,\nso no imbalance',la:'tl'},
+  {t:'text',i:2,p:'l2',dy:18,s:'1',cls:'k-ink',anc:'middle',big:1},{t:'text',i:3,p:'l3',dy:18,s:'2',cls:'k-ink',anc:'middle',big:1},{t:'text',i:4,p:'l4',dy:18,s:'3',cls:'k-ink',anc:'middle',big:1}]})};
+FIG.fvgStack=()=>{const c=[K(100,101,1,.5),K(101,108,.5,.2),K(108,109,.5,2),K(109,116,.5,.2),K(116,117,.5,2.5),K(117,119,1,.7),K(119,115,.8,.6),K(115,113,.5,1.2),K(113,118,.6,.5),K(118,122,1,.6),K(122,121,1,.8),K(121,124,.8,.6)];
+  return candleChart({c,w:780,h:400,y:[96,130],alt:'Stacked fair value gaps and what to do after price moves on',a:[
+  {t:'zone',i1:0,i2:9,p1:'h0',p2:'l2',cls:'k-mute',s:'FVG #1: never needed',la:'bl'},{t:'zone',i1:2,i2:9,p1:'h2',p2:'l4',cls:'k-blue',s:'FVG #2: price taps it',la:'tr'},
+  {t:'dot',i:7,p:'l7',cls:'k-liq',s:'tap and bounce',dx:-9,anc:'end',dy:14},{t:'tag',i:9,p:'h9',dy:-10,s:'NEW HIGH: both gaps are finished. Delete them.',cls:'k-ink',anc:'end'}]})};
+WID.fvgLab=el=>{
+  el.innerHTML=`<div class="wid-h">FVG detector: is there a gap?<span>Interactive</span></div><div class="wid-b"><div class="seg" id="fvgD"><button type="button" aria-pressed="true" data-d="up">Bullish pattern</button><button type="button" aria-pressed="false" data-d="dn">Bearish pattern</button></div>
+  <div class="ctl"><div><label for="fvgA">Candle 1 upper wick tip <output id="fvgAO"></output></label><input id="fvgA" type="range" min="1010" max="1100" value="1030"></div><div><label for="fvgB">Candle 3 lower wick tip <output id="fvgBO"></output></label><input id="fvgB" type="range" min="1000" max="1090" value="1065"></div></div><div id="fvgC"></div><div class="read" id="fvgT"></div></div>`;
+  let dir='up';
+  const draw=()=>{const a=+$('#fvgA',el).value/10,b=+$('#fvgB',el).value/10;
+    $('#fvgAO',el).textContent=a.toFixed(1);$('#fvgBO',el).textContent=b.toFixed(1);
+    let c=[{o:100,c:101,h:a,l:99},{o:101,c:112,h:112.5,l:100.8},{o:112,c:113.5,h:114.5,l:b}];
+    const gap=b-a;let an=[];
+    if(dir==='dn')c=flip(c,106.25);
+    const g=dir==='up'?gap:gap;
+    if(g>0)an.push({t:'zone',i1:0,i2:2,p1:dir==='up'?'h0':'l0',p2:dir==='up'?'l2':'h2',cls:'k-blue',s:'FVG',la:'c'});
+    else an.push({t:'zone',i1:0,i2:2,p1:dir==='up'?'l2':'h2',p2:dir==='up'?'h0':'l0',cls:'k-bad',s:'overlap',la:'c'});
+    $('#fvgC',el).innerHTML=candleChart({c,w:760,h:300,y:dir==='up'?[96,118]:[94.5,116.5],alt:'Three-candle pattern',a:an});
+    $('#fvgT',el).innerHTML=g>0?`<b style="color:var(--blue)">${dir==='up'?'Bullish':'Bearish'} fair value gap, ${g.toFixed(1)} points wide.</b> Nothing traded in that zone between the first and third candle, so ${dir==='up'?'sell':'buy'} orders are thin there. Expect price to be drawn back into it, and watch for a reaction.`:`<b style="color:var(--bad)">Not a fair value gap.</b> The wicks of candles 1 and 3 overlap by ${Math.abs(g).toFixed(1)} points, so orders traded across the whole range. No imbalance. Colour of the outer candles never matters, only the wicks.`};
+  $$('#fvgD button',el).forEach(b=>b.addEventListener('click',()=>{dir=b.dataset.d;$$('#fvgD button',el).forEach(x=>x.setAttribute('aria-pressed',x===b));draw()}));
+  $$('input',el).forEach(i=>i.addEventListener('input',draw));draw()};
+PAGES.push({id:'m06',part:'III',n:6,title:'Fair Value Gaps',min:24,level:'Core concept',src:'Source: lesson "Fair Value Gaps Explained"',
+lead:'Price is always doing one of two things: taking liquidity, or filling an imbalance. Fair value gaps are the imbalance half, and your first tool for judging whether a new move will continue.',
+goals:['Identify bullish and bearish FVGs from the wicks of three candles','Explain why a gap means orders are thin on one side','Tell a real FVG from overlapping wicks','Handle stacks of gaps and know when to delete them'],
+html:`
+<h2>Definition</h2>
+<p>A <b>fair value gap (FVG)</b>, also called an <b>imbalance</b>, is a three-candle pattern. A strong middle candle moves price quickly in one direction, leaving a zone between the first candle's wick and the third candle's wick where little or no trading happened.</p>
+<ul><li><b>Bullish FVG:</b> the high of candle 1 is <em>below</em> the low of candle 3. The gap is the space between them.</li><li><b>Bearish FVG:</b> the low of candle 1 is <em>above</em> the high of candle 3.</li></ul>
+${F2('fvgBull','fvgBear','Use only the wick tips of candles 1 and 3. The colour of candles 1 and 3 is irrelevant. The middle (expansion) candle is the one that creates the gap.','Bullish FVG','Bearish FVG','Three-candle imbalance')}
+<h2>Why a gap is meaningful</h2>
+<p>Look at candle 1 in the bullish example: price rose, then sellers pushed it back, so a stack of sells existed up to its high. Candle 3: buyers pushed price from below up through this zone. Between those two wicks, nobody sold into the move. The expansion candle simply ran through the empty space, meaning <b>sell orders were scarce</b> in that range. In a bearish FVG the scarce side is buy orders.</p>
+<p>If price comes back into the gap and buyers appear, the lack of sellers above means price can move on without resistance. That is why a gap acts as a <b>continuation confluence</b>: it shows the trend can keep going.</p>
+${W_('fvgLab')}
+<h2>What is not a fair value gap</h2>
+${F('fvgNot','The lower wick of candle 3 reaches below the upper wick of candle 1. The wicks overlap, so orders traded in the whole range. There is no imbalance.','Overlap = no FVG')}
+<p>The instructor also does not trade classic candlestick patterns such as head and shoulders or double tops. The criticism is simple: those patterns say what a chart looked like, but they do not say <em>why</em> price moved. An FVG has a reason attached to it: a measurable lack of orders.</p>
+<h2>When a gap is disrespected</h2>
+<p>A gap is respected when price enters it and moves away in the trend direction. It is <b>disrespected</b> when a candle <b>closes</b> beyond it on the far side (the same candle-close rule as break of structure; wicks do not count). A disrespected gap is no longer valid. In the next two modules you will see that this failure is itself a signal.</p>
+<h2>Stacks of gaps</h2>
+<p>Strong moves often leave several gaps with no retracement between them. While they are stacked, all of them remain valid. Price may use any one of them, and closing through the first does not mean the trend is over because deeper gaps can still catch it.</p>
+<p>Once price taps a gap and then pushes on to a new high (or low in a downtrend), that imbalance has done its job. <b>Delete every gap beneath the move.</b> Do not drag old gaps forward and expect them to work weeks later. The same is true for gaps price never needed: if the trend resumes without touching them, they are finished too.</p>
+${F('fvgStack','Two stacked gaps. Price uses FVG #2 and rises to a new high. Neither gap should remain on the chart afterward.','Gap stack and clean-up')}
+${WARN('<p>Leaving stale gaps on the chart. Later price drifts into an old gap, you short it expecting a reaction, and you get stopped out. The gap was already used.</p>')}
+${WARN('<p>Pressing buy or sell the moment price touches a gap. If the candle is still forming, price can run straight through. Wait for evidence of a reaction before entering.</p>')}`,
+recap:['FVG = three candles where the wicks of 1 and 3 do not overlap. Colours do not matter.','The gap marks a range where one side of orders is missing. It is a continuation confluence.','Overlapping wicks = no gap. Close beyond a gap = gap disrespected.','Stacked gaps stay valid until the trend moves on. Then delete them all.','Never trade a gap touch blindly. Look for the reaction.']});
+QZ.m06=[
+{q:'Which describes a bullish FVG?',o:['Candle 1 low above candle 3 high','Candle 1 high below candle 3 low, with a strong middle candle','Three green candles in a row','Any gap between two days'],a:1,w:'Bullish FVG: gap between the high of candle 1 and the low of candle 3.'},
+{q:'In a bullish FVG, what is thin in the gap?',o:['Buy orders','Sell orders','Both','Neither'],a:1,w:'Price passed through quickly because there were few sellers there.'},
+{q:'Candle 3 has a long lower wick that dips below the high of candle 1. Is there an FVG?',o:['Yes, always','No, the wicks overlap','Only if candle 2 is red','Only on the daily'],a:1,w:'Overlapping wicks mean orders traded across the entire range.'},
+{q:'Price taps FVG #2 in a stack and then makes a new high. What do you do with the gaps?',o:['Keep both for later','Delete both; the imbalance was balanced','Move them to the daily chart','Short at the first gap'],a:1,w:'Once the imbalance is balanced and the trend moves on, the gaps are finished.'}];
+
+/* ================= MODULE 7: ADVANCED IMBALANCES ================= */
+FIG.ndog=()=>{const c=[...chain(96,[97.5,99,98.2,99.6,100],3),K(104.5,102.8,1.2,3.4),K(102.8,105.5,1,.8),K(105.5,107.5,.8,.8),K(107.5,106.8,1,.7),K(106.8,109.5,1,.7)];
+  return candleChart({c,w:760,h:350,y:[92,114],alt:'Weekend opening gap filled then price continues',xl:{4:'Fri close',5:'Sun open'},a:[{t:'zone',i1:4,i2:6,p1:100,p2:104.5,cls:'k-liq',s:'OPENING GAP: unbalanced price',la:'tl'},
+  {t:'dot',i:5,p:'l5',cls:'k-good',s:'gap filled, then continues',dx:12,dy:14}]})};
+FIG.bpr=()=>{const c=[K(100,100.5,.6,.5),K(100.5,106,.3,.2),K(106,112,.3,.2),K(112,118,.3,.2),K(118,118.8,.8,.7),K(118.8,118.2,.9,.8),K(118.2,112,.3,.2),K(112,106,.3,.2),K(106,100.8,.3,.4),K(100.8,101.5,.6,.5),K(101.5,108,.3,.3),K(108,115,.3,.2),K(115,118.6,.5,.4),K(118.6,112,.3,.2),K(112,105,.3,.3),K(105,99.5,.3,.4)];
+  return candleChart({c,w:780,h:400,y:[94,124],alt:'Balanced price range',a:[{t:'zone',i1:1,i2:8,p1:100.3,p2:118.9,cls:'k-liq',s:'ILLIQUID RANGE: swift move up, then swift move down',la:'tl'},
+  {t:'arrow',i1:1,p1:'c1',i2:3,p2:'h3+2.5',cls:'k-good',s:'swift up',dx:-60,dy:10},{t:'arrow',i1:6,p1:'h6+1',i2:8,p2:'l8-2',cls:'k-bad',s:'swift down',dx:16,dy:-10},
+  {t:'arrow',i1:10,p1:'l10-1',i2:12,p2:'h12+2.5',cls:'k-blue',s:'revisit: fast fill',dx:-58,dy:22},{t:'arrow',i1:13,p1:'h13+1',i2:15,p2:'l15-2',cls:'k-bad',s:'and fast again',dx:14,dy:-16}]})};
+PAGES.push({id:'m07',part:'III',n:7,title:'Advanced Imbalance Concepts',min:20,level:'Advanced',src:'Source: lesson "Advanced Imbalance Concepts"',
+lead:'Fair value gaps are only one kind of imbalance. Opening gaps and balanced price ranges also pull price, and knowing them gives you extra targets and entries.',
+goals:['Recognise new-day, new-week and new-candle opening gaps','Rank them by usefulness','Explain what a BPR is and why a revisit tends to be fast','Use imbalances as both targets and entries'],
+html:`
+<p>Every imbalance is a place where price moved so quickly that a range was left lightly traded. Price tends to come back to balance it, then continue. These are not required to fill, and they are not guaranteed to react, but they carry a high probability and give the chart extra structure.</p>
+${tbl(['Type','What it is','How useful'],[['New day opening gap (NDOG)','Gap between the previous day close and the next day open (about one hour of no trading)','Occasional. Often fills during Asia, which this course does not trade'],['New week opening gap (NWOG)','Gap between Friday close and Sunday open (about two days with no trading)','Better. Larger and often still open on Monday morning'],['New candle opening gap','Gap between consecutive candle close and open on any time frame','Almost useless. Markets are continuous, so these are tiny'],['BPR (balanced price range)','A swift move up through imbalance followed by a swift move down through it','Useful as a target or entry zone']])}
+<h2>Opening gaps</h2>
+<p>The market closes at 17:00 ET for one hour each day and for the weekend (Friday close to Sunday afternoon). If the next open is at a different price, the space between is an imbalance. Price is usually keen to revisit it quickly, then continue in its own direction.</p>
+${F('ndog','Friday close at 100, Sunday open at 104.5. The very first candle drops to fill the gap, then price carries on higher.','Weekend opening gap (NWOG)')}
+<p>You can use an opening gap in two ways. As a <b>target</b>: if price is far above a gap, the gap is a likely destination. As an <b>entry</b>: when price comes into the gap and shows a reaction, look for the continuation. Weekly gaps are the practical ones because Sunday trading is stagnant, so Monday often gives time to act.</p>
+${TIP('<p>If a weekly gap is not filled in the first hours of the week, it becomes a high-probability target for Monday and Tuesday.</p>')}
+<h2>New candle opening gaps</h2>
+<p>These are the same idea on any time frame, but with no real time between one candle's close and the next open, they only appear on very small time frames and span a few ticks. The instructor describes them as nearly useless. Know they exist, then move on.</p>
+<h2>BPR: balanced price range</h2>
+<p>Sometimes price makes a swift move up through a series of imbalances, then a swift move down through the same area. The whole range was crossed with no resistance twice, so it is an illiquid range. When price re-enters it later, it tends to travel through just as quickly as before, and it often continues in its original direction afterward.</p>
+${F('bpr','A swift rise and an equally swift decline create a thin range. On a revisit, price crosses it fast in both directions. Use it as a target or as an area to look for entries.','Balanced price range')}
+<p>The instructor shared a New York trade that was taken off a BPR: a short on NASDAQ around 10:41 a.m., targeting the bottom of the range because once price re-entered it, it could drop through just as it had risen. Bearish confirmation was needed first. The imbalance told him where the trade could go, not when to enter.</p>
+${KEY('<p>Price is always moving to take <b>external liquidity</b> (highs and lows) or to fill <b>internal liquidity</b> (imbalances). Fair value gaps, opening gaps and BPRs are the internal kind.</p>')}`,
+recap:['Imbalances are price ranges left lightly traded. Price tends to revisit them.','NWOG > NDOG > new candle gap in usefulness.','A BPR = swift move up and swift move down through the same area. A revisit is usually fast.','All imbalances can act as targets or entries, never as standalone signals.']});
+QZ.m07=[
+{q:'Which gap is described as nearly useless for trading?',o:['New week opening gap','New day opening gap','New candle opening gap','Fair value gap'],a:2,w:'Candle-to-candle gaps in a continuous market are tiny and rarely tradable.'},
+{q:'Why is the weekend (NWOG) gap more practical than the daily one?',o:['It is larger and often still open Monday morning','It always fills instantly','Sunday has heavy volume','It is the same as NDOG'],a:0,w:'Bigger gap, more time for action before the US session.'},
+{q:'What defines a BPR?',o:['Two equal highs','A swift move through imbalance in one direction followed by a swift move back through it','Three candles with no wicks','A gap between days'],a:1,w:'The zone was crossed quickly both ways, so it is thin on both sides.'},
+{q:'What do you do when an opening gap is far below price?',o:['Ignore it','Treat it as a potential target','Short it immediately','Delete it'],a:1,w:'Opening gaps are high-probability destinations.'}];
+
+/* ================= MODULE 8: INVERSE FVG ================= */
+FIG.ifvg=()=>{const c=[K(126,124,.8,.6),K(124,122,.8,.6),K(122,120,.8,.6),K(120,119,.8,1),K(119,110,.3,.5),K(110,109,2,.6),K(109,113,.6,.5),K(113,116.5,.8,.6),K(116.5,121,.8,.6),K(121,119.5,.6,.5),K(119.5,116,.8,.9),K(116,122,.7,.5),K(122,126,.8,.5),K(126,129,.8,.5)];
+  return candleChart({c,w:780,h:400,y:[104,134],alt:'A bearish fair value gap is closed above and becomes support',a:[
+  {t:'zone',i1:3,i2:8,p1:'h5',p2:'l3',cls:'k-bad',s:'BEARISH FVG\n(a continuation tool: expected to push price lower)',la:'bl'},
+  {t:'zone',i1:8,i2:13,p1:'h5',p2:'l3',cls:'k-good',s:'INVERSE FVG\nnow acts as support',la:'br'},
+  {t:'tag',i:8,p:'h8',dy:-10,s:'CANDLE CLOSES ABOVE THE GAP',cls:'k-ink',anc:'end'},{t:'dot',i:10,p:'l10',cls:'k-liq',s:'retest: holds',dx:-9,anc:'end',dy:14}]})};
+FIG.ifvgStack=()=>{const c=[K(100,101,1,.5),K(101,108,.5,.2),K(108,109,.5,2),K(109,116,.5,.2),K(116,117,.5,2.5),K(117,119,1,.7),K(119,111.5,.6,.4),K(111.5,108,.5,.6),K(108,107,.6,.8),K(107,100.8,.5,.7),K(100.8,98,.6,.6)];
+  return candleChart({c,w:780,h:400,y:[94,126],alt:'Stack of gaps: only the lowest gap inverting breaks the trend',a:[
+  {t:'zone',i1:0,i2:9,p1:'h0',p2:'l2',cls:'k-blue',s:'LOWER gap',la:'bl'},{t:'zone',i1:2,i2:7,p1:'h2',p2:'l4',cls:'k-liq',s:'UPPER gap',la:'tr'},
+  {t:'tag',i:7,p:'l7',dy:26,s:'closes below UPPER gap: not enough',cls:'k-liq',anc:'end'},{t:'tag',i:9,p:'l9',dy:26,s:'closes below LOWER gap: inverse',cls:'k-bad',anc:'end'}]})};
+FIG.ifvgCompare=()=>`<svg viewBox="0 0 760 270" role="img" aria-label="Entering on the inverse FVG versus waiting for the break of structure">
+<text x="20" y="28" class="b big">Same trade idea, two entries. Risking $1,000 on each.</text>
+<g class="k-good"><text x="20" y="76" class="b">Enter on the inverse FVG</text><rect x="20" y="88" width="190" height="34" class="zone"/><text x="26" y="110" class="kt">risk $1,000</text><rect x="210" y="88" width="247" height="34" rx="0" style="fill:var(--good)"/><text x="218" y="110" style="fill:#04180F;font-weight:500">reward $1,300 (about 1:1.3)</text></g>
+<g class="k-bad"><text x="20" y="168" class="b">Wait for the break of structure</text><rect x="20" y="180" width="190" height="34" class="zone"/><text x="26" y="202" class="kt">risk $1,000 (stop twice as wide)</text><rect x="210" y="180" width="85" height="34" style="fill:var(--bad)"/><text x="302" y="202" class="kt">reward $450</text></g>
+<text x="20" y="252" style="font-size:12px">The BOS only arrived a full 4-hour candle later, so the entry was about 68 ticks worse and the stop about double.</text></svg>`;
+PAGES.push({id:'m08',part:'III',n:8,title:'Inverse Fair Value Gaps',min:22,level:'Advanced',src:'Source: lesson "Inverse Fair Value Gaps Explained"',
+lead:'A fair value gap that fails is not just a dead gap. It is information. When a continuation signal is ignored, the trend it protected is probably over, and you often learn that earlier than a break of structure would tell you.',
+goals:['Classify each confluence as reversal, confirmation or continuation','Identify an inverse FVG and apply the candle-close rule','Explain why an inverse gap can beat a break of structure','Choose the correct gap in a stack for the inverse test'],
+html:`
+<h2>Classifying the tools you have</h2>
+<p>You now know enough confluences to sort them by job. This vocabulary is the backbone of the strategy.</p>
+${tbl(['Job','Question it answers','Tools so far'],[['Reversal / opportunity','Is there a chance that orders can be filled and a move can turn?','Liquidity: highs, lows, sessions, equal levels'],['Confirmation','Did orders actually get filled and the trend change?','Break of structure, inverse FVG'],['Continuation','Will the new trend keep going?','Fair value gap, equilibrium (next module)']])}
+<h2>The idea</h2>
+<p>A fair value gap in a trend is supposed to be respected: price tags it and moves on. If instead a candle <b>closes through the gap</b>, the continuation tool has failed. The market did not do what that trend would do, which suggests a change of direction. That makes a failed gap a <b>confirmation</b> confluence.</p>
+${F('ifvg','A bearish gap should push price lower. Instead a candle closes above it, flipping the gap into support. Price retests it, holds, and trends up.','Inverse fair value gap')}
+${KEY('<p>An <b>inverse FVG</b> is a gap that is closed through by a full candle body. The same rule as break of structure applies: wicks do not count, the candle must close beyond.</p>')}
+<h2>Why it is useful: earlier information</h2>
+<p>An inverse gap often triggers <em>before</em> a break of structure is available. A BOS needs a close beyond the last swing, which may still be far away. A gap sits near price, so its failure can show up one or two candles earlier. Entering there, rather than after the BOS, can move your entry far closer to the turning point.</p>
+${F('ifvgCompare','Lesson example on a 4-hour chart: entering on the inverse gap would have been about 68 ticks better than waiting for the BOS. In a second example the saving was 123 ticks.','What earlier information is worth')}
+<p>That difference does two things: your stop shrinks, and your reward-to-risk improves. The lesson walks through $1,000 of risk earning $1,300 on the early entry versus only about $450 on the late one.</p>
+<h2>Stacks: which gap must invert?</h2>
+<p>With several gaps stacked, closing through the <em>top</em> one means nothing, because lower ones can still hold the trend. For an inverse signal in an uptrend you need the <b>lowest gap</b> to be closed below. For a downtrend, the highest gap must be closed above.</p>
+${F('ifvgStack','Closing below the upper gap leaves the lower gap available to hold the trend. Only the close below the lowest gap marks the trend as finished.','Stack rule')}
+${WARN('<p>Treating every inverse gap as a trade. The instructor is explicit: you cannot sell every inverse bearish signal and buy every inverse bullish one. It is a confirmation tool, valuable only when it follows a real opportunity such as a liquidity sweep.</p>')}
+<h3>The full chain so far</h3>
+${steps([['1  Opportunity','Liquidity','Price sweeps a high or low, so orders could be filled.'],['2  Confirmation','BOS or inverse FVG','Evidence that the move did turn.'],['3  Continuation','FVG or equilibrium','Evidence that the new trend keeps going.']])}`,
+recap:['Reversal = liquidity. Confirmation = BOS and inverse FVG. Continuation = FVG and equilibrium.','An inverse FVG is a gap closed through by a candle body, not a wick.','It often triggers before a BOS, improving entry, stop size and reward-to-risk.','In a stack, the farthest gap in the trend direction must invert.','Never trade an inverse FVG without a preceding opportunity.']});
+QZ.m08=[
+{q:'What changes a fair value gap into an inverse FVG?',o:['A wick through it','A candle body closing through it','A news event','Time passing'],a:1,w:'The close rule applies: only a candle close beyond the gap counts.'},
+{q:'Which category is an inverse FVG?',o:['Reversal','Confirmation','Continuation','Target'],a:1,w:'It confirms that the existing trend has failed.'},
+{q:'Uptrend with two stacked bullish gaps. Price closes below the upper one. Is it an inverse signal?',o:['Yes','No, the lower gap can still hold the trend','Only on Fridays','Yes, if volume is high'],a:1,w:'The lowest gap must be inverted for the trend to be considered finished.'},
+{q:'Why can an inverse FVG improve the trade?',o:['It removes the need for a stop','It often appears earlier than a BOS, giving a better entry and tighter stop','It guarantees the target','It works without liquidity'],a:1,w:'Earlier information means a smaller stop and a better reward-to-risk ratio.'}];
+</script>
+<script>
+/* ================= MODULE 9: EQUILIBRIUM ================= */
+const _eqUp=()=>chain(100,[101,105,109,113,117,114,111,107,111,115,119,122],4);
+FIG.eqUp=()=>candleChart({c:_eqUp(),w:520,h:360,y:[94,128],alt:'Equilibrium in an uptrend',a:[{t:'range',lo:'l0',hi:'h4',i1:0,i2:11},
+  {t:'dot',i:7,p:'l7',cls:'k-liq',s:'tap into discount',dx:-9,anc:'end',dy:14},{t:'arrow',i1:8,p1:'c8',i2:11,p2:'h11+2',cls:'k-good'}]});
+FIG.eqDown=()=>candleChart({c:flip(_eqUp(),110),w:520,h:360,y:[92,126],alt:'Equilibrium in a downtrend',a:[{t:'range',lo:'l4',hi:'h0',i1:0,i2:11},
+  {t:'dot',i:7,p:'h7',cls:'k-liq',s:'tap into premium',dx:-9,anc:'end',dy:-3},{t:'arrow',i1:8,p1:'c8',i2:11,p2:'l11-2',cls:'k-bad'}]});
+FIG.eqWrong=()=>{const c=chain(100,[97,102,107,112,109,106,104.5,109,114,119,123,120,116],6),w=(c[0].l+c[10].h)/2;
+  return candleChart({c,w:780,h:400,y:[90,132],alt:'Correct versus incorrect equilibrium range',a:[{t:'range',lo:'l6',hi:'h10',i1:6,i2:12,top:'PREMIUM (correct range)',bot:'DISCOUNT (correct range)'},
+  {t:'hline',p:w,i1:0,i2:12,cls:'k-bad',s:'WRONG 50%: drawn from an old low',la:'l'},{t:'dot',i:6,p:'l6',cls:'k-good',s:'most recent low',dx:-9,anc:'end',dy:15},{t:'dot',i:0,p:'l0',cls:'k-bad',s:'not this one',dx:9,dy:12},{t:'dot',i:10,p:'h10',cls:'k-good',s:'most recent high',dx:-9,anc:'end',dy:-4}]})};
+WID.eqLab=el=>{
+  el.innerHTML=`<div class="wid-h">Premium or discount? Test your entry price<span>Interactive</span></div><div class="wid-b"><div class="seg" id="eqD"><button type="button" aria-pressed="true" data-d="up">Uptrend (looking to buy)</button><button type="button" aria-pressed="false" data-d="dn">Downtrend (looking to sell)</button></div>
+  <div class="ctl"><div style="grid-column:1/-1"><label for="eqP">Current price inside the range (swing low 100, swing high 120) <output id="eqO"></output></label><input id="eqP" type="range" min="1000" max="1200" value="1170"></div></div><div id="eqS"></div><div class="read" id="eqT"></div></div>`;
+  let d='up';
+  const draw=()=>{const p=+$('#eqP',el).value/10,x=v=>40+(v-100)/20*680,disc=p<110;
+    $('#eqO',el).textContent=p.toFixed(1)+(p===110?' (exactly EQ)':disc?' (discount)':' (premium)');
+    $('#eqS',el).innerHTML=`<svg viewBox="0 0 760 130" role="img" aria-label="Premium and discount bar"><rect x="40" y="46" width="340" height="30" fill="var(--good)" fill-opacity=".25"/><rect x="380" y="46" width="340" height="30" fill="var(--bad)" fill-opacity=".25"/><line x1="380" x2="380" y1="34" y2="88" stroke="var(--ink)" stroke-width="2" stroke-dasharray="4 3"/><text x="380" y="26" text-anchor="middle" class="b">EQ 110 (50%)</text><text x="40" y="106">${d==='up'?'swing low 100':'swing low 100 (target)'}</text><text x="720" y="106" text-anchor="end">${d==='up'?'swing high 120 (target)':'swing high 120'}</text><text x="210" y="66" text-anchor="middle" style="fill:var(--good);font-weight:500">DISCOUNT</text><text x="550" y="66" text-anchor="middle" style="fill:var(--bad);font-weight:500">PREMIUM</text><path d="M${x(p)} 80 l-9 16 h18z" fill="var(--liq)" stroke="var(--panel)" stroke-width="2"/></svg>`;
+    let msg;if(d==='up')msg=disc?`<b style="color:var(--good)">Discount.</b> In an uptrend, price below EQ is where buyers (and large players) want to accumulate. This is the area to look for a buy once you see confirmation.`:`<b style="color:var(--bad)">Premium.</b> Buying here is topping up at an expensive price. Wait for price to retrace below EQ. Market makers will not want to add longs this high either.`;
+    else msg=disc?`<b style="color:var(--good)">Discount for a downtrend.</b> Selling here is selling cheap, after most of the retrace has not happened. Wait for price to rally up into premium.`:`<b style="color:var(--bad)">Premium.</b> For a downtrend this is the right area to look for a sell: price has retraced up into an expensive zone, so continuation lower is likelier. Wait for confirmation.`;
+    $('#eqT',el).innerHTML=msg+'<br><br>Remember: reaching the zone is never enough. You still need price to react and show confirmation.'};
+  $$('#eqD button',el).forEach(b=>b.addEventListener('click',()=>{d=b.dataset.d;$$('#eqD button',el).forEach(x=>x.setAttribute('aria-pressed',x===b));draw()}));
+  $('#eqP',el).addEventListener('input',draw);draw()};
+PAGES.push({id:'m09',part:'III',n:9,title:'Equilibrium',min:15,level:'Core concept',src:'Source: lesson "Equilibrium Explained"',
+lead:'The simplest continuation tool in the course, and the one most often drawn wrong. Equilibrium splits a move in half so you only look for entries in the cheap half.',
+goals:['Draw equilibrium from the correct swing points in both trend directions','Define premium and discount and say where each side should trade','Explain why large players avoid the expensive half of a range','Combine equilibrium with FVGs and the other confluences'],
+html:`
+<h2>What it is</h2>
+<p><b>Equilibrium (EQ)</b> is the 50% level of the most recent swing range inside a trend. It divides that range into two zones:</p>
+<ul><li><b>Discount</b>: below 50%. In an uptrend this is the area where buyers want to be.</li><li><b>Premium</b>: above 50%. In an uptrend this is expensive, so buying there is topping up at a bad price.</li></ul>
+<p>Large players think the same way: they do not want to add to a long at the top of a range. They want price pushed into a discount first, then they buy and send it higher. In a downtrend, everything flips: premium is where you look to sell, discount is where shorts are poorly priced.</p>
+${F2('eqUp','eqDown','The dotted line is the 50% level. In the uptrend, price retraces below EQ (into discount), then continues up. In the downtrend, price retraces above EQ (into premium), then continues down.','Uptrend: buy in discount','Downtrend: sell in premium','Premium / discount')}
+<h2>How to draw it</h2>
+${KEY('<p><b>Uptrend:</b> from the most recent swing low up to the most recent swing high.<br><b>Downtrend:</b> from the most recent swing high down to the most recent swing low.</p>')}
+<p>"Most recent" is the entire rule and the entire source of mistakes. Do not stretch the range from a distant low. Draw it from the swing that produced the move you are retracing.</p>
+${F('eqWrong','The correct range runs from the latest swing low to the latest swing high. Drawing from an old low shifts the 50% line and tells you a cheaper price than the market really offers.','The most common mistake')}
+<p>When you draw it live, wait until the retrace has formed. If a retrace has started after a high, the most recent high is that high and the most recent low is the low of the last leg. Add the tool once the swing is confirmed. A fraction later, if a new swing is made, move it.</p>
+${W_('eqLab')}
+<h2>Context makes it work</h2>
+<p>Equilibrium is a continuation confluence, like the FVG. By itself it is useless; it only matters inside a chain of reasoning:</p>
+${steps([['1  Opportunity','Liquidity','Price sweeps a low in a downtrend'],['2  Confirmation','Inverse FVG','A bearish gap is closed above: trend flips'],['3  Continuation','FVG or EQ','Price retraces into a bullish gap or below EQ, then extends']])}
+<p>When equilibrium is not reached, a gap may do the job instead. When both are present, the confluence is stronger. Practise on every time frame. The behaviour is the same on the weekly and the 1-minute chart.</p>
+${WARN('<p>Drawing the tool the instant a swing appears and shorting the first touch. Wait for a close that shows the reaction. Price can pass EQ and keep going.</p>')}`,
+recap:['EQ = 50% of the most recent swing range. Below = discount, above = premium.','Uptrend: buy in discount. Downtrend: sell in premium.','Draw from the MOST RECENT low to high (or high to low). Never from older swings.','It is a continuation confluence. It needs a sweep and confirmation before it.']});
+QZ.m09=[
+{q:'In a downtrend, from where to where do you draw equilibrium?',o:['Oldest high to newest low','Most recent swing high down to most recent swing low','Any high to any low','From the open to the close'],a:1,w:'Always the most recent swing range in the trend.'},
+{q:'In an uptrend, which zone is favourable for looking to buy?',o:['Premium','Discount','Exactly at the high','Neither'],a:1,w:'Large players prefer to accumulate below 50%.'},
+{q:'You draw EQ from a low that is 20 candles old. What is the likely effect?',o:['Nothing','The 50% line is in the wrong place, giving a misleading level','It becomes more precise','It switches to a downtrend'],a:1,w:'Using stale swings misplaces EQ.'},
+{q:'EQ is classed as a:',o:['Reversal tool','Confirmation tool','Continuation tool','Time tool'],a:2,w:'It shows where a new trend can continue from.'}];
+
+/* ================= MODULE 10: SMT ================= */
+const _es=()=>chain(100,[103,106,[108,1.2,.6],105.5,103.5,106.5,[107,.5,.6],104,100.5,97],12),_nq=()=>chain(200,[206,212,[216,2.4,1.2],211,207,213,[219,1,1],213,206,199],13);
+FIG.smtES=()=>candleChart({c:_es(),w:520,h:340,y:[93,114],alt:'S&P 500 making a lower high',a:[{t:'hline',p:'h2',i1:2,i2:6,cls:'k-liq'},{t:'dot',i:6,p:'h6',cls:'k-bad',s:'LOWER high',dx:-9,anc:'end',dy:-4},{t:'tag',i:7,p:'h7',dy:-26,s:'LEADER (weak)',cls:'k-bad',anc:'start'},{t:'arrow',i1:6.4,p1:'h6-.5',i2:9,p2:'l9+1',cls:'k-bad'}]});
+FIG.smtNQ=()=>candleChart({c:_nq(),w:520,h:340,y:[194,226],alt:'Nasdaq making a higher high',a:[{t:'hline',p:'h2',i1:2,i2:6,cls:'k-liq'},{t:'dot',i:6,p:'h6',cls:'k-good',s:'HIGHER high',dx:-9,anc:'end',dy:-4},{t:'tag',i:7,p:'h7',dy:-26,s:'LAGGARD (strong)',cls:'k-good',anc:'start'},{t:'arrow',i1:6.4,p1:'h6-.5',i2:9,p2:'l9+1',cls:'k-bad',s:'follows ES down',dx:-80,dy:20}]});
+FIG.smtESb=()=>candleChart({c:flip(_es(),103.5),w:520,h:340,y:[93,114],alt:'S&P 500 making a higher low',a:[{t:'hline',p:'l2',i1:2,i2:6,cls:'k-liq'},{t:'dot',i:6,p:'l6',cls:'k-good',s:'HIGHER low',dx:-9,anc:'end',dy:15},{t:'tag',i:7,p:'l7',dy:34,s:'LEADER (strong)',cls:'k-good',anc:'start'},{t:'arrow',i1:6.4,p1:'l6+.5',i2:9,p2:'h9-1',cls:'k-good'}]});
+FIG.smtNQb=()=>candleChart({c:flip(_nq(),209.5),w:520,h:340,y:[194,226],alt:'Nasdaq making a lower low',a:[{t:'hline',p:'l2',i1:2,i2:6,cls:'k-liq'},{t:'dot',i:6,p:'l6',cls:'k-bad',s:'LOWER low',dx:-9,anc:'end',dy:15},{t:'tag',i:7,p:'l7',dy:34,s:'LAGGARD (weak)',cls:'k-bad',anc:'start'},{t:'arrow',i1:6.4,p1:'l6+.5',i2:9,p2:'h9-1',cls:'k-good',s:'follows ES up',dx:-80,dy:-8}]});
+PAGES.push({id:'m10',part:'IV',n:10,title:'SMT Divergence',min:20,level:'Advanced',src:'Source: lesson "SMT Divergence Explained"',
+lead:'The S&P 500 and the Nasdaq are tightly correlated, but not identical. When they disagree at an important level, one of them is telling you about the other before it happens.',
+goals:['Define a bullish and a bearish SMT divergence','Identify which index is the leader and which is the laggard','Explain why SMT is only useful at real draws on liquidity','Pick the right index for the trade'],
+html:`
+<p>SMT divergence compares two correlated instruments: here the S&amp;P 500 (ES) and the Nasdaq (NQ). It does not work for forex and commodities in the same form, because it depends on this pair. The instructor admits he does not know what the letters stand for. What matters is how it works.</p>
+<h2>The idea</h2>
+<p>Because ES and NQ track each other so closely, small disagreements carry information. Imagine both sweep the same major high. If ES makes a high and then a <b>lower high</b>, while NQ makes a high and then a <b>higher high</b>, the two did not confirm each other. ES filled enough orders to start turning down. NQ has not yet turned. ES is leading, and it hints at what NQ will do next.</p>
+${F2('smtES','smtNQ','Same time axis on both charts. Both sweep the shared level at candle 2. ES fails to reach it again (lower high). NQ pushes beyond it (higher high). Bearish for both.','S&P 500 (ES): high, then lower high','Nasdaq (NQ): high, then higher high','Bearish SMT divergence')}
+<h2>Bullish version</h2>
+<p>Mirror image. At a major low, one index makes a low then a <b>higher low</b>, and the other makes a lower low. The index making the higher low leads upward.</p>
+${F2('smtESb','smtNQb','Bullish SMT at a significant low: ES holds a higher low, NQ undercuts it.','S&P 500: low, then higher low','Nasdaq: low, then lower low','Bullish SMT divergence')}
+${tbl(['','Bearish SMT','Bullish SMT'],[['Leading index','Makes high then LOWER high','Makes low then HIGHER low'],['Lagging index','Makes high then HIGHER high','Makes low then LOWER low'],['Meaning','Orders were likely filled above the high','Orders were likely filled below the low'],['Bias for both','Down','Up'],['Trade on','The leading (weaker) index','The leading (stronger) index']])}
+<h2>Location, location</h2>
+${KEY('<p>SMT is only valuable while price is sweeping an important draw on liquidity (a high-timeframe high or low, a session extreme, a previous-day level). Away from those levels divergences appear all day and mean almost nothing.</p>')}
+<h2>Which index do you trade?</h2>
+<p>Trade the leader. In a bearish SMT, the index that failed to sweep the high is the one already carrying the downside intent. Shorting the index that just made a higher high is shorting the stronger index. The lesson's examples show the leading index expanding faster and further than the laggard.</p>
+<h2>Use on higher and lower time frames</h2>
+<p>On higher time frames (4-hour) SMT works well for <b>bias</b>: it tells you whether a sweep of a major high is likely to reverse. On lower time frames (5-minute) it supports <b>execution</b>. In the strategy lesson the instructor notes a bearish SMT at the London high and uses it to strengthen a bearish plan, even though his daily bias had been bullish.</p>
+${WARN('<p>Splitting charts and trading every divergence. Divergence away from liquidity is noise. Divergence without confirmation is just a note on the chart.</p>')}`,
+recap:['SMT = ES and NQ disagreeing at a level. One makes a higher high or low, the other fails to.','Bearish: ES lower high vs NQ higher high. Bullish: mirror at lows.','The failing (leading) index is the one to trade. Both indices are expected to follow.','Only relevant at real draws on liquidity. Elsewhere it is noise.']});
+QZ.m10=[
+{q:'ES makes a high then a lower high. NQ makes a high then a higher high. What is this?',o:['Bullish SMT','Bearish SMT','No signal','A BOS'],a:1,w:'One index failed to make a higher high while the other did: bearish divergence.'},
+{q:'Which index do you prefer to short in that situation?',o:['NQ, the stronger','ES, the leader making the lower high','Both with double size','Neither'],a:1,w:'Trade the leading index that is already showing weakness.'},
+{q:'When is SMT most meaningful?',o:['Anytime','While sweeping an important draw on liquidity','Only in Asia','Only on the daily'],a:1,w:'Away from liquidity, divergences are frequent and mean little.'},
+{q:'For a bullish SMT at a low, the leading index:',o:['Makes a lower low','Makes a higher low','Makes equal lows','Makes no low'],a:1,w:'A higher low shows buyers stepped in sooner.'}];
+
+/* ================= MODULE 11: TIME THEORY ================= */
+FIG.nyTime=()=>{const c=chain(100,[100.2,99.9,100.3,101.6,103,[102.2,.8,.6],104.4,103.2,[105.2,1.5,.5],102.2,98.6,96.2,96.8,95.4,96,95.6],15);
+  return candleChart({c,w:780,h:400,y:[92,110],alt:'New York open time windows',xl:{0:'9:15',3:'9:30',7:'9:50',9:'10:00',11:'10:10',15:'10:30'},a:[
+  {t:'zone',i1:3,i2:6,p1:'B',p2:'T',band:1,cls:'k-liq',s:'MANIPULATION 9:30-9:50',la:'tl'},{t:'zone',i1:7,i2:10,p1:'B',p2:'T',band:1,cls:'k-good',s:'ENTRY WINDOW 9:50-10:10',la:'tl'},
+  {t:'vline',i:15,cls:'k-bad',s:'10:30'},{t:'hline',p:96.2,i1:9,i2:15,cls:'k-ink'},{t:'text',i:5,p:96.2,dy:17,s:'higher time frame low (target)',cls:'k-ink',anc:'middle'},
+  {t:'dot',i:8,p:'h8',cls:'k-bad',s:'last push up',dx:-9,anc:'end',dy:-4},{t:'tag',i:9,p:'c9',dy:-34,s:'ENTRY ~10:00',cls:'k-ink',anc:'start'},{t:'arrow',i1:9.2,p1:'c9',i2:11.2,p2:'c11',cls:'k-bad'}]})};
+PAGES.push({id:'m11',part:'IV',n:11,title:'Time Theory',min:14,level:'Core concept',src:'Source: lesson "Time Theory Explained"',
+lead:'Even a perfect setup fails at the wrong time. Knowing when the market is likely to move, and when it is likely to do nothing, is a skill of its own.',
+goals:['Recall the session times and the thin hour in Eastern Time','Use the 9:30 to 10:30 sequence for New York','Explain why manipulation tends to come first','Decide when to stop looking for trades'],
+html:`
+<p>Timing matters because the goal is a high-probability read of the day. If you do not understand when new money enters, you work against the clock. This module is deliberately short: the rules are few, and they all hinge on the New York open.</p>
+${tbl(['Window (ET)','What it is','Why it matters'],[['18:00 to 03:00','Asia session','Builds the first range of the day'],['03:00 to 08:30','London session (pre-market opens at 02:00)','Often sweeps Asia, then runs the other way'],['08:30 to 09:30','New York pre-market','US traders arrive. Pre-market manipulation is typical. Much data prints at 08:30'],['09:30','New York open','New money enters. Expect a move that takes liquidity'],['09:30 to 09:50','Manipulation window','Price usually sweeps something here'],['09:50 to 10:10','Entry window (the "macro")','The ideal time for the entry'],['by 10:30','Cut-off','No trade by now? The instructor is done for the day'],['13:00','PM session opens','Exists, but is not traded in this system'],['17:00 to 18:00','Spread hour','No market. Spreads on CFD/forex brokers widen. Do not trade']])}
+<h2>The logic of the sequence</h2>
+<p>The market opens at 09:30 and fresh US money arrives. Fresh money needs counterparties, so we should expect some form of manipulation: a sweep of a higher or lower time frame draw on liquidity. That typically happens in the first twenty minutes. Once the sweep is complete and the market has changed direction, an entry opens between roughly 09:50 and 10:10. By 10:30 the market tends to slow down, so a missing setup means stepping aside.</p>
+${F('nyTime','A typical New York morning: price pushes up from the open, makes one last push around 9:55 to sweep, rejects at 10:00, and falls to the higher time frame low by 10:05 to 10:15.','The first hour in New York')}
+${KEY('<p>These times are a map, not a gate. The lesson shows a day where the final leg of manipulation arrived at 09:52, two minutes later than usual, and the instructor says he sometimes enters at 09:45 or 10:20. What matters is the order of events: <b>sweep first, entry after</b>.</p>')}
+<h2>Examples from the lesson</h2>
+${steps([['Example 1','Manipulate up, then sell','9:30 to 9:50 pushes up. A final push at 9:50 gives a 10:00 entry short, which reached higher time frame lows by 10:05.'],['Example 2','Manipulate down, then buy','9:30 opens and sweeps lows. After 9:50 a retrace gives the entry near 10:00, then an extension higher.'],['Example 3','Late sweep','Nothing in the 9:30 window. The final leg of manipulation appears at 9:52, then expansion higher.']])}
+<h2>High-impact news days</h2>
+<p>On heavy news days price action gets erratic and good examples are rare. The risk module shows one of the instructor's rules for those days: cut position size in half.</p>
+${WARN('<p>Entering before the sweep because you are impatient or fear missing out. Let the manipulation happen, then trade the reaction.</p>')}
+<h2>Practice</h2>
+<ul><li>Pull up the last 20 trading days on a 5-minute chart.</li><li>Mark 09:30, 09:50, 10:10 and 10:30 on each.</li><li>Record what was swept between 09:30 and 09:50 and what the 09:50 to 10:10 move did.</li></ul>`,
+recap:['Sessions in ET: Asia 18:00-03:00, London 03:00-08:30, NY pre 08:30, open 09:30, spread hour 17:00-18:00.','Expect a sweep from 09:30 to 09:50. The entry window is 09:50 to 10:10.','If nothing by 10:30, stand aside. The times are a map, not a rigid gate.','Sweep first, entry after.']});
+QZ.m11=[
+{q:'When is the ideal entry window in the lesson?',o:['09:30 to 09:50','09:50 to 10:10','11:00 to 12:00','13:00 to 14:00'],a:1,w:'The window after the manipulation is complete.'},
+{q:'What does the instructor do if no trade appears by 10:30?',o:['Takes any trade','Is done for the day','Doubles size','Switches to Asia'],a:1,w:'The market slows after 10:30.'},
+{q:'The 09:30 to 09:50 window is mainly for:',o:['Entry','Manipulation (sweep)','News only','Rest'],a:1,w:'Fresh money arrives and tends to sweep liquidity first.'},
+{q:'The spread hour is:',o:['09:30-10:30','17:00-18:00','03:00-04:00','12:00-13:00'],a:1,w:'The thin hour between New York close and the next session.'}];
+
+/* ================= MODULE 12: DAILY BIAS ================= */
+FIG.biasDown=()=>{const c=chain(130,[127,124,121,124,127,123,119,115,118,121,117,113,109,112,115,109,104,99,94],14);
+  return candleChart({c,w:780,h:420,y:[86,136],alt:'Bearish bias: retrace to equilibrium then expansion to the next low',a:[
+  {t:'poly',pts:[[4,'h4'],[7,'l7'],[9,'h9'],[12,'l12']],cls:'k-liq'},
+  {t:'range',lo:'l12',hi:'h9',i1:10,i2:18,top:'PREMIUM',bot:'DISCOUNT'},
+  {t:'tag',i:4,p:'h4',dy:-9,s:'1  HTF trend: LH + LL (bearish)',cls:'k-ink',anc:'start'},
+  {t:'tag',i:15,p:'h9',dy:-12,s:'2  retrace tags the 50% line',cls:'k-liq',anc:'middle'},
+  {t:'hline',p:'l12',i1:12,i2:17,cls:'k-bad'},
+  {t:'arrow',i1:14.4,p1:'h14-1',i2:18,p2:'l18+1',cls:'k-bad',s:'3  expansion',dx:-60,dy:24}]})};
+FIG.ebb=()=>{const c=chain(100,[104,108,[112,.8,.6],109,106,110,114,[118,.8,.6],115,111,116,121,125],17);
+  return candleChart({c,w:780,h:380,y:[94,132],alt:'External and internal liquidity cycle',a:[{t:'poly',pts:[[2,'h2'],[4,'l4'],[7,'h7'],[9,'l9'],[12,'h12']],cls:'k-liq'},
+  {t:'text',i:2,p:'h2',dy:-9,s:'external: high taken',cls:'k-good',anc:'middle'},{t:'text',i:7,p:'h7',dy:-9,s:'external: high taken',cls:'k-good',anc:'middle'},{t:'text',i:12,p:'h12',dy:-9,s:'external: next high',cls:'k-good',anc:'middle'},
+  {t:'text',i:4,p:'l4',dy:19,s:'internal: gap / discount EQ',cls:'k-blue',anc:'middle'},{t:'text',i:9,p:'l9',dy:19,s:'internal: gap / discount EQ',cls:'k-blue',anc:'middle'}]})};
+WID.biasWizard=el=>{
+  el.innerHTML=`<div class="wid-h">Bias builder: answer four questions<span>Interactive</span></div><div class="wid-b"><div class="ctl">
+  <div><label for="bwA">1. 4H / 1H trend</label><select id="bwA"><option value="1">Uptrend (HH + HL)</option><option value="-1">Downtrend (LH + LL)</option><option value="0">Range / unclear</option></select></div>
+  <div><label for="bwB">2. Where is price in the swing?</label><select id="bwB"><option value="d">In discount / at a FVG</option><option value="m">Middle</option><option value="p">In premium</option></select></div>
+  <div><label for="bwC">3. Overnight manipulation</label><select id="bwC"><option value="0">None yet</option><option value="h">Swept a high</option><option value="l">Swept a low</option></select></div>
+  <div><label for="bwD">4. Untouched draws</label><select id="bwD"><option value="a">Stacked highs above</option><option value="b">Stacked lows below</option><option value="n">Nothing obvious</option></select></div></div><div class="read" id="bwT"></div></div>`;
+  const draw=()=>{const t=+$('#bwA',el).value,loc=$('#bwB',el).value,sw=$('#bwC',el).value,dr=$('#bwD',el).value;let s=0;const why=[];
+    if(t){s+=2*t;why.push(`${t>0?'Uptrend':'Downtrend'} on 4H/1H: ${t>0?'+':'-'}2`)}else why.push('No clear higher time frame trend: 0');
+    if(t>0&&loc==='d'){s+=1;why.push('Price in discount in an uptrend: +1')}if(t>0&&loc==='p'){s-=1;why.push('Price in premium in an uptrend (expensive): -1')}
+    if(t<0&&loc==='p'){s-=1;why.push('Price in premium in a downtrend (a sell area): -1')}if(t<0&&loc==='d'){s+=1;why.push('Price in discount in a downtrend (poor place to sell): +1')}
+    if(sw==='l'){s+=1;why.push('Sell-side swept: buy-side fuel taken, favours up: +1')}if(sw==='h'){s-=1;why.push('Buy-side swept: favours down: -1')}
+    if(dr==='a'){s+=1;why.push('Untouched highs above act as a magnet: +1')}if(dr==='b'){s-=1;why.push('Untouched lows below act as a magnet: -1')}
+    const v=s>=2?['Bullish bias','var(--good)']:s<=-2?['Bearish bias','var(--bad)']:['No clean bias','var(--ink2)'];
+    $('#bwT',el).innerHTML=`<b style="color:${v[1]};font-size:19px">${v[0]} (score ${s>0?'+':''}${s})</b><ul style="margin:10px 0 0">${why.map(w=>`<li>${w}</li>`).join('')}</ul><p style="margin:12px 0 0">${v[0]==='No clean bias'?'Stand aside or trade smaller. The instructor says plainly that a bias is only a hypothesis, and that the market can prove you wrong. Be ready to flip it if an opposing sweep and confirmation appear.':'Next: look for the lower time frame sweep, confirmation and continuation that matches this direction. Do not enter on the bias alone.'}</p>`};
+  $$('select',el).forEach(x=>x.addEventListener('change',draw));draw()};
+PAGES.push({id:'m12',part:'V',n:12,title:'Finding Daily Bias',min:26,level:'Advanced',src:'Source: lesson "How To Find Daily Bias"',
+lead:'Without a bias, every entry is a coin flip. This module turns the whole toolbox into a routine you run before the open.',
+goals:['Run a repeatable five-step bias routine','Explain the external-internal-external cycle','Recognise when a bias has been invalidated','Define entry, stop and targets for a bias-based plan'],
+html:`
+<p><b>Daily bias</b> is your expectation of the direction in which price will deliver during the session. The lesson is blunt: if you do not know where the market wants to go, you have no reason to enter. Bias answers where; the lower time frames answer when.</p>
+<h2>The five-step routine</h2>
+${steps([['Step 1','Higher time frame trend','On the 4-hour and 1-hour, read the structure. HH + HL, or LH + LL?'],['Step 2','Mark draws on liquidity','Stacked highs and lows, Asia high/low, previous day high/low, London high/low.'],['Step 3','Find continuation tools','Unmitigated 1H/4H FVGs and the 50% equilibrium of the latest swing.'],['Step 4','Expect manipulation','Will New York sweep an obvious level before the real move?'],['Step 5','Respect or invert','Price taps a gap and holds: bias confirmed. A close through: bias flips.']])}
+${W_('biasWizard')}
+<h2>The ebb and flow of delivery</h2>
+<p>Price alternates between two kinds of liquidity. <b>External</b> liquidity is the swing high or low outside the current range. <b>Internal</b> liquidity is inside it: fair value gaps and equilibrium. A healthy uptrend takes an external high, retraces into internal liquidity (a gap or a discount), then goes for the next external high. A downtrend does the mirror.</p>
+${F('ebb','External, internal, external: the rhythm of a trend. Knowing which stage you are in stops you from chasing an expansion after it has happened.','The cycle')}
+<h2>A bearish day worked through</h2>
+${F('biasDown','Higher time frame structure is bearish. Price retraces up to the 50% line of the last swing, then expands lower and takes the previous low. Entry details come from the lower time frames.','Bias on a downtrend day')}
+<p>The pattern the lesson repeats: identify the trend, mark the pools below, wait for a retrace into a continuation tool (gap or EQ), and expect delivery to the next external draw. The bullish version is the exact mirror.</p>
+<h2>When the bias is challenged</h2>
+<ul><li><b>Pre-market low sweep inside an uptrend.</b> Overnight price pushes below a higher time frame low. Beginners see a lower low. In context it can be a sweep that filled buy orders. Bullish structure holds until a real close breaks it.</li>
+<li><b>Close through a gap.</b> If a 1H bearish gap is closed above, the bearish case is void and a bullish plan is in play. Adapt immediately.</li>
+<li><b>A single close below a shallow gap.</b> Not a failed trend. Deeper unmitigated gaps and discount levels may still hold.</li>
+<li><b>No manipulation before the open.</b> The market needs fuel. If London and Asia left everything untouched, expect New York to sweep first.</li></ul>
+<h2>From bias to a trade plan</h2>
+<ul><li><b>Entry.</b> Do not buy the sweep wick. Wait for a 5-minute BOS in the bias direction, a retrace into a 5-minute gap or discount EQ, and a reaction.</li>
+<li><b>Stop.</b> Beyond the swing that started the move, or the 5-minute structure level.</li>
+<li><b>Targets.</b> Scale out: TP1 at nearby lower time frame highs or lows, final target at the higher time frame draw (hourly extreme, Asia high, previous day high).</li></ul>
+${TIP('<p>When the major target is very far away, set intermediate profit points. Holding everything for one distant level is a recipe for giving back open profit.</p>')}
+${WARN('<p>Trying to catch the exact bottom of a sweep. You are not equipped to front-run a large player. Let the sweep print, then wait for structure to confirm.</p>')}
+<h2>Context days</h2>
+<p>The lesson includes the session before an FOMC announcement, described as an ugly market. Structure was still bullish on the 4-hour, price pulled back into a large 4-hour gap, a 5-minute gap was inverted down first, lower pools were swept, and then a 5-minute bearish gap was inverted back up. Bias held, but the lower time frame needed the sweep and an inversion before expansion. Tough days ask for patience, not a changed rulebook.</p>`,
+recap:['Bias = expected direction for the session. Without it, entries are guesses.','Routine: HTF trend, draws on liquidity, continuation tools, expected manipulation, respect or invert.','Trends breathe: external, internal, external.','A bias is a hypothesis. A close through your gap flips it.','Entries come from the lower time frames, never from bias alone.']});
+QZ.m12=[
+{q:'What are internal liquidity and external liquidity?',o:['Gaps/EQ and swing highs/lows','News and sessions','Volume and spread','Premium and discount'],a:0,w:'Internal = imbalances and equilibrium. External = swing highs and lows.'},
+{q:'Price pushes below a higher time frame low pre-market in an uptrend. Best reading?',o:['The trend has reversed','It may be a sweep; structure is intact until a close breaks it','Immediately short','Ignore the chart'],a:1,w:'Bullish structure holds until a candle closes through the monitored swing.'},
+{q:'The best entry in a bias-based plan is:',o:['Buy the exact wick low','After a 5-minute BOS and a retrace into a gap or discount EQ with a reaction','At the open regardless','Only on news'],a:1,w:'Wait for structure, retrace and reaction rather than anticipating.'},
+{q:'A 1H bearish FVG gets closed above by a large bullish candle. What happens to a bearish bias?',o:['Stronger','It is invalidated; adapt toward bullish','Unchanged','Double the size'],a:1,w:'The gap failed, an inverse FVG, signalling bullish delivery.'}];
+</script>
+<script>
+/* ================= MODULE 13: RISK + PSYCHOLOGY ================= */
+FIG.rrBox=()=>`<svg viewBox="0 0 760 250" role="img" aria-label="Risk and reward of the example trade">
+<text x="20" y="26" class="b big">Example short on 1 ES contract (1-minute chart)</text>
+<g class="k-bad"><rect x="20" y="52" width="${16/77*560}" height="38" class="zone"/><text x="${28+16/77*560}" y="76" class="kt">Risk: 16 ticks = 4.00 points = $200</text></g>
+<g class="k-good"><rect x="20" y="120" width="560" height="38" style="fill:var(--good);opacity:.85"/><text x="28" y="144" style="fill:#04180F;font-weight:500">Reward: 77 ticks = 19.25 points = $962.50</text></g>
+<text x="20" y="196" class="b">Reward-to-risk = 77 / 16 = 4.81  (written 1 : 4.81)</text>
+<text x="20" y="220">ES tick = 0.25 points = $12.50. Wins needed to break even at this ratio: only 1 in 5.8 trades.</text></svg>`;
+FIG.beCurve=()=>{const pts=[];for(let r=.5;r<=6.001;r+=.25)pts.push([r,100/(1+r)]);
+  return plotLines({w:780,h:340,x:[0,6],y:[0,70],xt:[0,1,2,3,4,5,6].map(v=>({v,s:'1:'+v})),yt:[0,10,20,30,40,50,60,70].map(v=>({v,s:v+'%'})),xlab:'Reward-to-risk (risk 1 : reward R)',ylab:'Win rate needed to break even',alt:'Break-even win rate versus reward-to-risk',
+  s:[{pts,cls:'k-liq',w:3,area:1}],p:[{x:1,y:50,s:'1:1 needs 50%',cls:'k-ink'},{x:2,y:33.33,s:'1:2 needs 33%',cls:'k-ink'},{x:3,y:25,s:'1:3 needs 25%',cls:'k-ink'},{x:4.81,y:17.24,s:'1:4.81 needs 17%',cls:'k-good',dy:-14}],hl:[{v:50,cls:'k-mute'}]})};
+FIG.recover=()=>{const pts=[];for(let l=0;l<=60;l+=2)pts.push([l,l/(100-l)*100]);
+  return plotLines({w:780,h:320,x:[0,60],y:[0,160],xt:[0,10,20,30,40,50,60].map(v=>({v,s:v+'%'})),yt:[0,40,80,120,160].map(v=>({v,s:v+'%'})),xlab:'Loss on the account',ylab:'Gain needed to recover',alt:'Gain required to recover from a drawdown',
+  s:[{pts,cls:'k-bad',w:3,area:1}],p:[{x:10,y:11.1,s:'-10% needs +11%',cls:'k-ink'},{x:20,y:25,s:'-20% needs +25%',cls:'k-ink'},{x:33.3,y:50,s:'-33% needs +50%',cls:'k-ink'},{x:50,y:100,s:'-50% needs +100%',cls:'k-bad',dx:-9,anc:'end'}]})};
+FIG.ddTypes=()=>{const cl=[100000,100800,101900,101200,102600,102100,103300,102500,103800,103100,102300],pk=[100500,101600,102700,101900,103400,102700,104100,103000,104600,103600,102900];
+  let mp=0,mc=0;const tI=[],tE=[],cs=[],ps=[];cl.forEach((v,i)=>{mp=Math.max(mp,pk[i]);mc=Math.max(mc,v);tI.push([i,mp-3500]);tE.push([i,mc-3500]);cs.push([i,v]);ps.push([i,pk[i]])});
+  const k=v=>(v/1000)+'k';
+  return plotLines({w:780,h:380,x:[0,10],y:[95000,105500],xt:[...Array(11).keys()].map(v=>({v,s:'day '+v})),yt:[96000,98000,100000,102000,104000].map(v=>({v,s:k(v)})),alt:'Three kinds of drawdown limit',pad:{r:110},
+  s:[{pts:cs,cls:'k-ink',w:2.5},{pts:ps,cls:'k-mute',d:1},{pts:tI,cls:'k-bad',w:2},{pts:tE,cls:'k-liq',w:2}],hl:[{v:96500,cls:'k-good',s:'static limit 96.5k'}],p:[{x:10,y:102300,cls:'k-ink',s:'closing equity',dx:-9,anc:'end',dy:20},{x:10,y:tI[10][1],cls:'k-bad',s:'trailing intraday limit',dx:-9,anc:'end',dy:18},{x:10,y:tE[10][1],cls:'k-liq',s:'end-of-day trailing limit',dx:-9,anc:'end',dy:-10},{x:8,y:104600,cls:'k-mute',s:'intraday peak',dx:-9,anc:'end',dy:-8,r:4}]})};
+WID.sizer=el=>{
+  const INS={ES:['E-mini S&P 500 (ES)',12.5],NQ:['E-mini Nasdaq (NQ)',5],MES:['Micro S&P 500 (MES)',1.25],MNQ:['Micro Nasdaq (MNQ)',.5]};
+  el.innerHTML=`<div class="wid-h">Position size and risk calculator<span>Interactive</span></div><div class="wid-b"><div class="ctl">
+  <div><label for="szI">Instrument</label><select id="szI">${Object.entries(INS).map(([k,v])=>`<option value="${k}">${v[0]}</option>`).join('')}</select></div>
+  <div><label for="szA">Account balance ($)</label><input id="szA" type="number" min="1000" step="1000" value="50000"></div>
+  <div><label for="szR">Risk per trade <output id="szRO"></output></label><input id="szR" type="range" min="25" max="500" step="25" value="100"></div>
+  <div><label for="szS">Stop distance, ticks <output id="szSO"></output></label><input id="szS" type="range" min="4" max="80" value="20"></div>
+  <div><label for="szF">Fixed contracts (for the chart)</label><input id="szF" type="number" min="1" max="50" value="2"></div></div>
+  <div class="stats" id="szSt"></div><div id="szC" style="margin-top:14px"></div><div class="read" id="szT"></div></div>`;
+  const draw=()=>{const ins=INS[$('#szI',el).value],tv=ins[1],bal=+$('#szA',el).value||1,rp=+$('#szR',el).value/100,st=+$('#szS',el).value,fx=Math.max(1,+$('#szF',el).value||1);
+    $('#szRO',el).textContent=rp.toFixed(2)+'%';$('#szSO',el).textContent=st+' ticks ('+(st/4).toFixed(2)+' pts)';
+    const riskD=bal*rp/100,per=st*tv,ct=Math.floor(riskD/per),act=ct*per,fixedRisk=fx*per;
+    $('#szSt',el).innerHTML=`<div class="stat"><small>Dollar risk budget</small><b>$${riskD.toFixed(0)}</b></div><div class="stat"><small>Risk per contract</small><b>$${per.toFixed(2)}</b></div><div class="stat ${ct<1?'bad':'good'}"><small>Contracts allowed</small><b>${ct}</b></div><div class="stat"><small>Actual risk</small><b>$${act.toFixed(0)} (${(act/bal*100).toFixed(2)}%)</b></div>`;
+    const pts=[];for(let s=4;s<=80;s+=2)pts.push([s,fx*s*tv/bal*100]);const ymax=Math.max(6,Math.ceil(Math.max(...pts.map(p=>p[1]))/1)+1);
+    $('#szC',el).innerHTML=plotLines({w:760,h:260,x:[4,80],y:[0,ymax],xt:[4,20,40,60,80].map(v=>({v,s:v+' ticks'})),yt:[...Array(Math.floor(ymax/2)+1).keys()].map(i=>i*2).map(v=>({v,s:v+'%'})),alt:'Risk percent for a fixed contract size',xlab:'Stop distance',
+      hl:[{v:3,cls:'k-liq',s:'3% ceiling'},{v:5,cls:'k-bad',s:'5%: unacceptable'}],s:[{pts,cls:'k-blue',w:3}],p:[{x:st,y:fx*st*tv/bal*100,s:(fx*st*tv/bal*100).toFixed(2)+'% with '+fx+' contract'+(fx>1?'s':''),cls:'k-ink',anc:'end',dx:-9}]});
+    const fr=fixedRisk/bal*100;
+    $('#szT',el).innerHTML=ct<1?`<b style="color:var(--bad)">Too wide for this budget.</b> One contract risks $${per.toFixed(0)}, more than the $${riskD.toFixed(0)} you allow. Use a smaller instrument (micros), a tighter stop, or skip the trade.`:`With <b>${fx} fixed contract${fx>1?'s':''}</b> a ${st}-tick stop risks $${fixedRisk.toFixed(0)} = <b style="color:${fr>3?'var(--bad)':'var(--good)'}">${fr.toFixed(2)}%</b> of the account. ${fr>3?'That is above the 3% ceiling. Cut the contract size, as the lesson does when stops are unusually wide.':'That sits inside the 1-3% band.'}`};
+  $$('select,input',el).forEach(x=>x.addEventListener('input',draw));draw()};
+WID.equitySim=el=>{
+  el.innerHTML=`<div class="wid-h">Equity simulator: 40 possible futures for the same strategy<span>Interactive</span></div><div class="wid-b"><div class="ctl">
+  <div><label for="qW">Win rate <output id="qWO"></output></label><input id="qW" type="range" min="20" max="80" value="40"></div>
+  <div><label for="qR">Reward-to-risk <output id="qRO"></output></label><input id="qR" type="range" min="5" max="50" value="25"></div>
+  <div><label for="qK">Risk per trade <output id="qKO"></output></label><input id="qK" type="range" min="25" max="1000" step="25" value="100"></div>
+  <div><label for="qN">Trades <output id="qNO"></output></label><input id="qN" type="range" min="30" max="300" step="10" value="120"></div></div>
+  <button class="btn liq" id="qGo" type="button">Run again</button><div id="qC" style="margin-top:12px"></div><div class="stats" id="qS"></div><div class="read" id="qT"></div></div>`;
+  let seed=11;
+  const draw=()=>{const p=+$('#qW',el).value/100,rr=+$('#qR',el).value/10,rk=+$('#qK',el).value/10000,n=+$('#qN',el).value;
+    $('#qWO',el).textContent=(p*100)+'%';$('#qRO',el).textContent='1 : '+rr.toFixed(1);$('#qKO',el).textContent=(rk*100).toFixed(2)+'%';$('#qNO',el).textContent=n;
+    const r=rng(seed),runs=[],fin=[],dd=[],ls=[];
+    for(let k=0;k<40;k++){let e=100,pk=100,md=0,st=0,ms=0;const pts=[[0,100]];for(let i=1;i<=n;i++){if(r()<p){e*=1+rk*rr;st=0}else{e*=1-rk;st++;ms=Math.max(ms,st)}pk=Math.max(pk,e);md=Math.max(md,(pk-e)/pk);pts.push([i,e])}runs.push(pts);fin.push(e);dd.push(md);ls.push(ms)}
+    const med=a=>[...a].sort((x,y)=>x-y)[a.length>>1],mx=Math.max(...fin.map(x=>Math.min(x,400))),mnv=Math.min(...runs.flat().map(q=>q[1]));
+    const ymax=Math.ceil(Math.max(130,Math.min(mx*1.05,600))/10)*10,ymin=Math.floor(Math.min(80,mnv*.97)/10)*10;
+    const mid=[];for(let i=0;i<=n;i++){mid.push([i,med(runs.map(rr_=>rr_[i][1]))])}
+    $('#qC',el).innerHTML=plotLines({w:760,h:320,x:[0,n],y:[ymin,ymax],xt:[0,.25,.5,.75,1].map(f=>({v:Math.round(n*f),s:Math.round(n*f)})),yt:[ymin,100,ymax].map(v=>({v,s:v})),xlab:'Trade number',ylab:'Account (start = 100)',alt:'Forty simulated equity curves',hl:[{v:100,cls:'k-mute'}],
+      s:[...runs.map(q=>({pts:q.map(z=>[z[0],Math.min(z[1],ymax)]),cls:'k-blue',w:1})),{pts:mid,cls:'k-liq',w:3.5}]});
+    const prof=fin.filter(x=>x>100).length,ex=p*rr-(1-p);
+    $('#qS',el).innerHTML=`<div class="stat ${ex>0?'good':'bad'}"><small>Expectancy per trade</small><b>${ex>=0?'+':''}${ex.toFixed(2)} R</b></div><div class="stat"><small>Median final account</small><b>${med(fin).toFixed(0)}</b></div><div class="stat ${prof>=30?'good':'bad'}"><small>Runs ending profitable</small><b>${prof} / 40</b></div><div class="stat bad"><small>Median worst drawdown</small><b>${(med(dd)*100).toFixed(0)}%</b></div><div class="stat"><small>Typical longest losing streak</small><b>${med(ls)} in a row</b></div>`;
+    $('#qT',el).innerHTML=ex<=0?`<b style="color:var(--bad)">Negative expectancy.</b> With these inputs the average trade loses ${Math.abs(ex).toFixed(2)}R. No amount of discipline fixes that: you need a real edge from a tested strategy first.`:`<b style="color:var(--good)">Positive expectancy of ${ex.toFixed(2)}R per trade</b>, yet look at the spread: same strategy, forty different outcomes, and a typical losing streak of ${med(ls)}. This is why sizing must let you survive streaks you cannot predict.`};
+  $$('input',el).forEach(x=>x.addEventListener('input',draw));$('#qGo',el).addEventListener('click',()=>{seed=(seed*7919+13)>>>0;draw()});draw()};
+PAGES.push({id:'m13',part:'V',n:13,title:'Risk Management & Psychology',min:30,level:'Essential',src:'Source: lesson "Risk Management & Psychology"',
+lead:'You can have a good strategy and still lose everything. Risk management keeps you alive through losing streaks, and psychology is simply whether you follow the plan when it hurts.',
+goals:['Define trading psychology as discipline and name the three fatal flaws','Choose a risk per trade between 1 and 3 percent and justify it','Use fixed contract sizing and know when to halve it','Read the maths of break-even win rates, streaks and drawdowns'],
+html:`
+<h2>Psychology is discipline</h2>
+<p>The instructor defines trading psychology narrowly, and usefully: <b>it is discipline</b>. Good psychology means you only take trades when your strategy presents them, you follow your risk plan, and you do not overtrade, overleverage or overrisk. Bad psychology is failing to follow either plan. It cannot be fixed with motivation or homework. At the point of decision, it is a choice.</p>
+${tbl(['The three fatal flaws','What it looks like'],[['Overrisking','Too much capital on one idea'],['Overleveraging','A position size that one bad trade can wreck'],['Overtrading','Taking setups that are not in the strategy, usually to recover or because of boredom']])}
+<p>The chart colour advice from Module 2 is part of this: use neutral colours so that candles do not become emotional triggers.</p>
+<h2>You need an edge before you can manage risk</h2>
+<p>A strategy has an edge when backtested and forward-tested records show a positive win rate combined with a positive reward-to-risk. Journalling every trade (the instructor mentions trade-journal software) is how that evidence is built. Risk management on a strategy with no edge only slows the loss.</p>
+<h2>Why risk comes first</h2>
+<p>The point of risk management is not to maximise a single trade. It is to <b>live to trade another day</b>. If two or three losses can erase weeks of profit or break a loss limit, the plan has failed no matter how clever the entries are.</p>
+<h2>How much to risk</h2>
+${KEY('<p>On a live account a sweet spot is <b>1% to 3%</b> of the account per trade. Risking 5%, 10% or 20% on one trade is unacceptable.</p>')}
+<h2>Fixed contracts instead of constant calculations</h2>
+<p>You can compute an exact percentage before every trade with a lot-size calculator. The instructor avoids that on live futures: opening a calculator while price is moving invites hesitation and mistakes. Instead, he fixes a standard number of contracts for ES and for NQ, and chooses it so that the <b>largest typical stop (about 35 ticks) risks no more than about 3 to 4%</b> of the account.</p>
+<p>Fixed contracts also balance themselves. A wide stop usually targets a smaller multiple of risk, while a tight stop can target a very large multiple. Over a series of trades the dollar outcome evens out without recalculating each time.</p>
+${W_('sizer')}
+<h3>The lesson's example</h3>
+${F('rrBox','The tight stop risks little and the structure offered a big target. The same dollar risk on a wide stop would normally be paired with a smaller target. Fixed contracts let both be sized sensibly.','Risk and reward on a real trade')}
+<h2>When to cut size in half</h2>
+${steps([['Case 1','Unusually wide stop','Structure demands a stop far larger than your normal range. Halve the contracts.'],['Case 2','High-impact news','Fundamental data (for example PPI or CPI at 8:30) makes price choppy and erratic. Halve the contracts.']])}
+<h2>The mathematics every trader should know</h2>
+<h3>1. Break-even win rate</h3>
+<p>If you risk 1 to make R, you only need to win 1 out of (1 + R) trades to break even. A strategy does not need a high win rate if the reward is large.</p>
+${F('beCurve','At 1:1 you must win more than half your trades. At 1:3 only 25%. The example trade at 1:4.81 would break even at 17%.','Break-even win rate')}
+<h3>2. Losing streaks are normal</h3>
+<p>With a 40% win rate, five losses in a row will happen routinely. Try it in the simulator: change the inputs and watch forty possible futures of the same strategy.</p>
+${W_('equitySim')}
+<h3>3. Drawdowns are expensive to recover</h3>
+${F('recover','A 50% loss needs a 100% gain. The deeper the hole, the less it matters how good your strategy is. Small risk per trade is what keeps you out of the steep part of this curve.','The recovery curve')}
+<h2>Mindset traps</h2>
+${steps([['Trap','Get-rich-quick','Expecting a fortune in a few months leads to forced setups and rising leverage. If that is the expectation, buy lottery tickets, the instructor jokes.'],['Trap','Unseen history','Viewers see a trader sized up and forget the years of unseen work behind it. Your timeline is your own.'],['Trap','Calculator paralysis','Switching windows to compute size while price moves causes panic.']])}`,
+recap:['Psychology = discipline: follow the strategy and the risk plan, and avoid overrisking, overleveraging and overtrading.','Risk 1% to 3% per trade. Never 5%, 10% or 20%.','Fixed contract sizing avoids live calculations. Halve size for wide stops or high-impact news.','Know your break-even win rate, your likely losing streak, and the recovery curve.','Risk management without a tested edge only slows the loss.']});
+QZ.m13=[
+{q:'How is trading psychology defined in the lesson?',o:['Staying positive','Discipline: following the strategy and risk plan','Controlling emotions with meditation','Ignoring losses'],a:1,w:'It is the behavioural adherence to the plan, nothing mystical.'},
+{q:'A strategy has a 1:3 reward-to-risk. What win rate is needed to break even?',o:['50%','33%','25%','10%'],a:2,w:'1 / (1 + 3) = 25%.'},
+{q:'When does the instructor cut contract size in half?',o:['After a win','Wide stop loss or high-impact news','On Mondays','Never'],a:1,w:'Two specified cases: unusually large stop and erratic news-driven markets.'},
+{q:'An account falls 50%. What gain is needed to get back to even?',o:['50%','75%','100%','200%'],a:2,w:'Half of the capital must double: +100%.'},
+{q:'Why does the instructor prefer fixed contracts?',o:['They are cheaper','They avoid using calculators during live trading and balance outcomes across stop sizes','The exchange requires it','They guarantee profit'],a:1,w:'Less friction in a fast market and sensible exposure over a series of trades.'}];
+
+/* ================= MODULE 14: FUNDED ACCOUNTS ================= */
+WID.propSim=el=>{
+  el.innerHTML=`<div class="wid-h">Evaluation planner: what are your real odds?<span>Interactive</span></div><div class="wid-b"><div class="ctl">
+  <div><label for="pT">Profit target ($)</label><input id="pT" type="number" min="500" step="500" value="8000"></div>
+  <div><label for="pD">Maximum drawdown ($)</label><input id="pD" type="number" min="500" step="500" value="3500"></div>
+  <div><label for="pK">Risk per trade ($)</label><input id="pK" type="number" min="50" step="50" value="400"></div>
+  <div><label for="pF">Evaluation fee ($)</label><input id="pF" type="number" min="10" step="10" value="279"></div>
+  <div><label for="pW">Win rate <output id="pWO"></output></label><input id="pW" type="range" min="25" max="70" value="45"></div>
+  <div><label for="pR">Reward-to-risk <output id="pRO"></output></label><input id="pR" type="range" min="5" max="40" value="20"></div></div><div class="stats" id="pS"></div><div class="read" id="pT2"></div></div>`;
+  const draw=()=>{const T=+$('#pT',el).value,D=+$('#pD',el).value,K=+$('#pK',el).value,F_=+$('#pF',el).value,p=+$('#pW',el).value/100,rr=+$('#pR',el).value/10;
+    $('#pWO',el).textContent=(p*100)+'%';$('#pRO',el).textContent='1 : '+rr.toFixed(1);const r=rng(99);let pass=0,tr=0;
+    for(let a=0;a<1000;a++){let e=0;for(let i=1;i<=400;i++){e+=r()<p?K*rr:-K;if(e>=T){pass++;tr+=i;break}if(e<=-D)break}}
+    const pr=pass/1000,ex=p*rr-(1-p);
+    $('#pS',el).innerHTML=`<div class="stat"><small>Losses to fail</small><b>${Math.ceil(D/K)} in a row</b></div><div class="stat"><small>Wins to hit target</small><b>${Math.ceil(T/(K*rr))} at 1:${rr.toFixed(1)}</b></div><div class="stat ${pr>.5?'good':'bad'}"><small>Simulated pass rate</small><b>${(pr*100).toFixed(0)}%</b></div><div class="stat"><small>Typical trades to pass</small><b>${pass?Math.round(tr/pass):'n/a'}</b></div><div class="stat bad"><small>Expected fees per pass</small><b>${pr>0?'$'+(F_/pr).toFixed(0):'no passes'}</b></div>`;
+    $('#pT2',el).innerHTML=`This uses a fixed drawdown limit and no other rules, so reality is harsher (trailing limits, consistency rules, daily caps). The honest reading: if your edge is ${ex>0?'positive ('+ex.toFixed(2)+'R per trade)':'not positive'}, ${ex>0?'size controls whether you survive the variance.':'the fee is simply a donation.'} Each failed attempt costs real money, and the lesson warns that people only realise it after blowing the account.`};
+  $$('input',el).forEach(x=>x.addEventListener('input',draw));draw()};
+PAGES.push({id:'m14',part:'V',n:14,title:'Funded Accounts Explained',min:18,level:'Optional',src:'Source: lesson "Funded Accounts Explained"',
+lead:'Prop firms let a trader with little capital trade a large account after passing a test. They are a tool, not a shortcut. The test only gets passed by people who are already good.',
+goals:['Explain how a prop firm challenge works and what you are really paying for','Read the rules that matter: target, drawdown type, consistency and payout cap','Choose risk differently in the evaluation and in the funded phase','Estimate the true cost of getting funded'],
+html:`
+<h2>How it works</h2>
+<p>A <b>prop firm</b> charges a fee for a challenge. You trade a simulated account of a given size (typically $25k, $50k, $100k or $150k in futures). You must reach a profit target without breaking the loss limit (the <b>drawdown</b>). If you pass, you move to a funded stage where you can earn payouts according to a profit split. Some firms offer "instant funding" accounts with no evaluation, but with stricter payout rules.</p>
+<p>The appeal for a small account is obvious: pay a few hundred dollars to trade a $100,000 account. The catch is also obvious: you need to be good. As the lesson puts it, to make money, whether on a live, demo or prop account, you need to be a skilled trader, and strategy and risk management have not even been fully taught at that point in the series.</p>
+${WARN('<p>Buying accounts before you can trade. The fee is real money, and many people only feel that after they blow an account.</p>')}
+<h2>Rules that decide whether you survive</h2>
+${tbl(['Rule','What to check','Example figures from the lesson'],[['Profit target','Percent to reach during evaluation','8% on a $100,000 account = $8,000'],['Maximum drawdown','How much equity you can lose, and how it is measured','$3,500 in one example; other firms offer $3,000 or $5,000 on $150k'],['Drawdown type','Static, trailing end of day, or trailing on live equity','See figure below'],['Consistency rule','Caps how much of the total profit one day or trade can supply','50% in one example, 20% in another'],['Contract limit','Maximum position size','10 contracts in one example'],['Minimum days','Minimum trading days to pass or request a payout','2 days evaluation, 5 days payout in the examples'],['Payout cap','Largest amount per withdrawal','$15,000 vs an industry norm of $1,200 to $5,000 (as claimed in the lesson)'],['Reset cost','What a failed attempt costs to retry','Same as the original fee in the example']])}
+<p><em>Figures were quoted in the lesson at the time and rules change often. Always read the current rulebook before paying.</em></p>
+<h2>Drawdown types</h2>
+<p>The same $3,500 allowance behaves very differently depending on how it is measured. A <b>trailing intraday</b> limit follows your highest unrealised equity, so a winning trade that reverses can leave you closer to the limit than you think. <b>End-of-day trailing</b> resets only at the close. <b>Static</b> stays fixed at the starting balance minus the allowance.</p>
+${F('ddTypes','Price paths are illustrative. Notice how the red intraday limit climbs with every peak while the green static limit never moves.','Three ways to measure the same allowance')}
+<h2>Two phases, two risk settings</h2>
+<p>During the evaluation, many traders use as much risk as the rules allow to pass in the fewest trades. Once funded and eligible for payouts, the instructor says to "pull on the reins": reduce size so that a single loss cannot erase the buffer. Passing a challenge is a sprint. Keeping a funded account is the opposite game.</p>
+${W_('propSim')}
+<h2>Which account type?</h2>
+<ul><li><b>Cheaper accounts</b> are cost-efficient but typically have tighter rules and lower payout caps.</li><li><b>Instant funding</b> skips the test but has strict consistency and payout rules. You still must be good at trading.</li><li><b>Accounts with fast payout schedules</b> let you request money sooner, but check the minimum days and consistency rules before relying on them.</li></ul>
+<p>The lesson compares consistency rules and finds them similar in effect once you count the number of winning trades each requires. The takeaway: compare the full rulebook, not the headline.</p>
+${KEY('<p>A prop account does not create edge. It only gives you leverage on the edge you already have, and charges you for each failed attempt.</p>')}`,
+recap:['A prop firm sells you a test. You are buying a chance, not capital.','Check target, drawdown type, consistency, contract limit, payout cap, reset cost.','Intraday trailing drawdown is the most dangerous. Know which one you have.','Evaluation = sprint, funded = reduce risk. Expect to pay several fees per pass.','Learn to trade profitably before buying anything.']});
+QZ.m14=[
+{q:'You pay for a prop firm challenge. What are you buying?',o:['Guaranteed capital','A chance to prove you can trade within rules and then access funded payouts','A trading strategy','Insurance'],a:1,w:'The challenge is a test, and a fee that is lost if you fail.'},
+{q:'Which drawdown type follows your highest unrealised equity?',o:['Static','Trailing end of day','Trailing intraday','Fixed percent'],a:2,w:'Trailing intraday uses live equity peaks, making it the tightest.'},
+{q:'After passing the evaluation, the instructor advises:',o:['Increase risk','Pull on the reins and reduce size','Stop trading','Take every setup'],a:1,w:'Protect the buffer so one loss does not erase payout eligibility.'},
+{q:'What is wrong with judging a prop firm only by its headline payout cap?',o:['Nothing','Consistency, drawdown, minimum days and cost all decide whether you ever get paid','Caps are illegal','Payout caps never change'],a:1,w:'Read the whole rulebook.'}];
+
+/* ================= MODULE 15: THE STRATEGY ================= */
+FIG.tradeWalk=()=>{const c=chain(101,[101.4,103,104.5,106,105,107,108.5,[110,2,.7],109,111.5,[111.2,3,.8],109,105,103.5,104.5,106.5,108,109,[107,1.5,.6],104,102,103,100.5,99.5,101,98,96.5,97.5,95],18);
+  return candleChart({c,w:820,h:440,y:[92,119],pad:{r:150},alt:'Annotated illustrative trade: sweep, break of structure, equilibrium, entry, three targets',a:[
+  {t:'hline',p:'h7',i1:7,i2:11,cls:'k-liq'},{t:'text',i:7,p:'h7',dy:-7,s:'London high',cls:'k-liq',anc:'middle'},
+  {t:'range',lo:'l13',hi:'h10',i1:10,i2:19,top:'',bot:''},
+  {t:'tag',i:10,p:'h10',dy:-9,s:'1 POTENTIAL: sweep + SMT',cls:'k-liq',anc:'end'},
+  {t:'tag',i:12,p:'l12',dy:28,s:'2 CONFIRMATION: 5m BOS',cls:'k-bad',anc:'middle'},
+  {t:'tag',i:17,p:'h17',dy:-9,s:'3 CONTINUATION',cls:'k-blue',anc:'end'},
+  {t:'hline',p:'c18',i1:18,i2:28.5,cls:'k-ink'},{t:'text',i:29.2,p:'c18',dy:4,s:'ENTRY (1m reaction)',cls:'k-ink',anc:'start'},
+  {t:'hline',p:'h10+.6',i1:18,i2:28.5,cls:'k-bad'},{t:'text',i:29.2,p:'h10+.6',dy:4,s:'STOP',cls:'k-bad',anc:'start'},
+  {t:'hline',p:104,i1:18,i2:28.5,cls:'k-good'},{t:'text',i:29.2,p:104,dy:4,s:'4 TP1 London low',cls:'k-good',anc:'start'},
+  {t:'hline',p:100.2,i1:18,i2:28.5,cls:'k-good'},{t:'text',i:29.2,p:100.2,dy:4,s:'TP2 Asia low',cls:'k-good',anc:'start'},
+  {t:'hline',p:96.2,i1:18,i2:28.5,cls:'k-good'},{t:'text',i:29.2,p:96.2,dy:4,s:'TP3 hourly lows',cls:'k-good',anc:'start'}]})};
+WID.tradeCheck=el=>{
+  const G=[['Higher time frame bias is defined (4H / 1H structure)',2],['Key draws on liquidity are marked above and below',1],['A significant high or low was swept (opportunity)',2],['Time is inside the 09:30 to 10:30 window',1],['SMT divergence supports the idea (if both indices checked)',1],['Lower time frame BOS or inverse FVG confirms the turn',2],['Price retraced into a gap or EQ (continuation)',2],['A lower time frame reaction confirms the entry',2],['Stop is placed beyond the sweep or structure, and its size is acceptable',2],['Position size keeps risk inside 1% to 3% (halved if news or wide stop)',2],['At least one target at a real draw on liquidity, TP1 at the nearest',1]];
+  el.innerHTML=`<div class="wid-h">Pre-trade checklist grader<span>Interactive</span></div><div class="wid-b"><div id="tcL"></div><div class="read" id="tcR"></div><button class="btn alt" id="tcX" type="button" style="margin-top:12px">Reset</button></div>`;
+  const tot=G.reduce((a,g)=>a+g[1],0),draw=()=>{const st=S.chk.trade||{};$('#tcL',el).innerHTML=G.map((g,i)=>`<label class="chk"><input type="checkbox" data-i="${i}" ${st[i]?'checked':''}><span>${g[0]} <small style="color:var(--mute);font-family:var(--f-mono)">(${g[1]})</small></span></label>`).join('');
+    let sc=0;G.forEach((g,i)=>{if(st[i])sc+=g[1]});const pc=Math.round(sc/tot*100),core=[2,5,6].every(i=>st[i]);
+    const v=pc>=90&&core?['A-grade setup','var(--good)','All the pieces are there. Execute the plan and nothing else.']:pc>=70?['Acceptable, but incomplete','var(--liq-ink)','Some links are missing. Reduce size or wait for the missing confirmation.']:['Not a trade yet','var(--bad)','You are guessing. The market will give another opportunity. Wait.'];
+    $('#tcR',el).innerHTML=`<b style="color:${v[1]};font-size:19px">${v[0]}: ${pc}%</b><br>${v[2]}${!core&&pc>=70?'<br><b>The sweep, the confirmation and the continuation are required, whatever else is ticked.</b>':''}`;
+    $$('input',el).forEach(x=>x.addEventListener('change',()=>{S.chk.trade=S.chk.trade||{};S.chk.trade[x.dataset.i]=x.checked;save();draw()}))};
+  $('#tcX',el).addEventListener('click',()=>{S.chk.trade={};save();draw()});draw()};
+PAGES.push({id:'m15',part:'V',n:15,title:'The Complete Strategy',min:28,level:'Capstone',src:'Source: lesson "TJR\'s Strategy Explained"',
+lead:'The last lesson does not give a rigid checklist. It shows a way of thinking that links every tool you have learned. This module reconstructs that logic and then gives you a checklist to train with.',
+goals:['State the four-part logic: opportunity, confirmation, continuation, liquidation','Walk a full trade from bias through targets','Explain why the instructor deliberately avoids a rigid step list','Grade your own setups before risking money'],
+html:`
+<h2>Before the strategy: three reminders</h2>
+<ul><li>Knowing the steps does not make you profitable. You need <b>strategy, risk management and psychology</b> together.</li><li>The skill of discretion comes only from hours of watching candles, backtesting, journalling and making mistakes. The lesson uses the 10,000-hour idea and the example of a basketball star's training plan: the plan helps only the person who does the work.</li><li>The instructor teaches the <em>thinking</em>, not a script. A script invites critics to say "you skipped step four", and it removes room to adapt. The markets are different every day, so you carry a toolbox rather than a single blueprint.</li></ul>
+<h2>The logic in four lines</h2>
+${steps([['1','Potential','Orders have the opportunity to be filled: a sweep of a significant high or low.'],['2','Confirmation','They actually were: a change in lower time frame structure by BOS or an inverse FVG.'],['3','Continuation','The new trend keeps going: a retrace into a FVG or equilibrium, then a reaction.'],['4','Liquidation','Exit where the orders you now hold can be sold: higher time frame extremes, session highs and lows, previous day levels.']])}
+${KEY('<p>Everything is about moving with the inflows and outflows of the market. You are not betting on a bounce off a line. You are following orders as they are filled, held and then liquidated.</p>')}
+<h2>A full trade, step by step</h2>
+<p>The lesson walks through a trade taken on a Friday morning, replayed on the S&amp;P 500 and Nasdaq. The picture below is a schematic reconstruction (not the real chart) with the same logic and sequence.</p>
+<h3>Before the open</h3>
+<p>Higher time frames are bullish: the 4-hour had an inverse gap on the upside, then respected a 4-hour gap and equilibrium, and was printing legs up. Draws are marked: London high, hourly highs, previous day high above; Asia low, London low and previous day low below. Daily bias going in: <b>bullish</b>, targeting the highs. Nasdaq has already pushed above the London high; the S&amp;P is well below its equivalent.</p>
+<h3>The open</h3>
+<p>Nasdaq is above the London high, the S&amp;P is under it: a <b>bearish SMT divergence</b>. Even though the bias was bullish, this weakens the case for higher prices. He does not flip yet. The 5-minute structure is still bullish, so he waits for proof. After two legs down, price breaks structure on both indices: orders were filled above the highs. The S&amp;P is the leader, so that is the instrument to trade.</p>
+<h3>Waiting for the continuation</h3>
+<p>No gap formed to inverse on the up-leg, so a BOS did the confirming. Next he needs continuation: a bearish gap or equilibrium of the down leg. A large up candle then fills the 5-minute equilibrium. Entering at the touch would be a mistake: the candle could keep going. Two options exist: wait for the next 5-minute candle to close bearish, or drop to the 1-minute and wait for a 1-minute BOS or inverse gap down while price is inside the 5-minute confluence. The second gets the better entry, and the trade is already at TP1 by the time the first would have been entered.</p>
+${F('tradeWalk','Illustrative. 1: a London high is swept (bearish SMT adds weight). 2: a 5-minute close below the latest low. 3: the retrace fills the 50% of the down leg. Entry on a 1-minute reaction, stop above the sweep high, three targets at real draws on liquidity.','The four-part logic on a chart')}
+<h3>Exit and outcome</h3>
+<p>The stop sits above the swept high. Targets: London session lows, Asia session lows and higher time frame hourly lows. All three hit. The instructor's remark about being wrong on bias is worth keeping: the market told him he was wrong for the day, and the plan still produced a profit because he followed the evidence rather than the opinion.</p>
+${W_('tradeCheck')}
+<h2>Why not "support and resistance"?</h2>
+<p>The lesson is explicit that the approach is built on orders and liquidity, not floors and ceilings. A bounce off a line has no mechanism behind it. Each step above has one: orders resting, orders filled, orders held, orders sold.</p>
+${WARN('<p>Copying the walkthrough as a script. The timing, the time frames used, even the confirmation tool may change from day to day. The mechanism does not.</p>')}`,
+recap:['Four-part logic: potential, confirmation, continuation, liquidation.','Bias is a hypothesis. The market can prove it wrong, and you follow the evidence.','Do not enter at the first touch of a gap or EQ. Wait for the reaction, often on the 1-minute.','Stop beyond the sweep. Targets at real draws on liquidity.','Skill comes from reps: backtest, journal, review.']});
+QZ.m15=[
+{q:'What does the "continuation" step answer?',o:['Were orders filled?','Will the new trend keep going?','Where is the exit?','What time is it?'],a:1,w:'Gaps and equilibrium show the new trend can continue.'},
+{q:'Why enter after a 1-minute reaction rather than at the first touch of the 5-minute EQ?',o:['It is cheaper','Price can keep going through the level; a reaction proves the level is respected','The exchange requires it','1-minute is always right'],a:1,w:'A touch is not a reaction. You need proof that price turns there.'},
+{q:'In the walkthrough, the bias was bullish yet the trade was a short. What does this illustrate?',o:['The system is inconsistent','Bias is a hypothesis; evidence from the market can override it','Always trade against bias','SMT is optional'],a:1,w:'The instructor let the market prove him wrong and still profited.'},
+{q:'Where are exits placed in the liquidation step?',o:['At random round numbers','At real draws on liquidity where held orders can be sold','Always at 1:1','At the open'],a:1,w:'Targets are session extremes, previous day levels and higher time frame highs and lows.'}];
+
+/* ================= MODULE 16: PRACTICE ================= */
+WID.expect=el=>{
+  el.innerHTML=`<div class="wid-h">Journal maths: is your sample profitable?<span>Interactive</span></div><div class="wid-b"><div class="ctl">
+  <div><label for="xW">Winning trades</label><input id="xW" type="number" min="0" value="38"></div><div><label for="xL">Losing trades</label><input id="xL" type="number" min="0" value="62"></div>
+  <div><label for="xA">Average win (in R)</label><input id="xA" type="number" min="0" step="0.1" value="2.6"></div><div><label for="xB">Average loss (in R)</label><input id="xB" type="number" min="0.1" step="0.1" value="1"></div></div><div class="stats" id="xS"></div><div class="read" id="xT"></div></div>`;
+  const draw=()=>{const w=+$('#xW',el).value||0,l=+$('#xL',el).value||0,a=+$('#xA',el).value||0,b=+$('#xB',el).value||1,n=w+l,wr=n?w/n:0,ex=wr*a-(1-wr)*b,pf=(1-wr)*b?wr*a/((1-wr)*b):0,be=1/(1+a/b);
+    $('#xS',el).innerHTML=`<div class="stat"><small>Trades</small><b>${n}</b></div><div class="stat"><small>Win rate</small><b>${(wr*100).toFixed(1)}%</b></div><div class="stat ${ex>0?'good':'bad'}"><small>Expectancy</small><b>${ex>=0?'+':''}${ex.toFixed(2)} R</b></div><div class="stat"><small>Profit factor</small><b>${pf.toFixed(2)}</b></div><div class="stat"><small>Break-even win rate</small><b>${(be*100).toFixed(1)}%</b></div>`;
+    $('#xT',el).innerHTML=n<100?`<b>Sample too small (${n}).</b> Under about 100 trades the numbers can mislead. Keep going before changing anything.`:ex>0?`<b style="color:var(--good)">Positive expectancy.</b> Over ${n} trades each trade averages ${ex.toFixed(2)}R. Next: check the result holds across different months and market conditions.`:`<b style="color:var(--bad)">Negative expectancy.</b> Either the setups are not defined tightly enough, the targets are too close, or discretion is leaking in. Review the biggest losses first.`};
+  $$('input',el).forEach(x=>x.addEventListener('input',draw));draw()};
+const MAST=['I can set up a clean chart on Eastern time and label trends on three time frames','I have marked sessions, previous day and equal highs/lows for 20 days','I can state, from memory, the candle-close rule for BOS, FVG disrespect and inverse FVG','I can draw equilibrium correctly in both directions without help','I have identified 30 SMT divergences at real liquidity','I have written my own pre-trade checklist','I have backtested at least 100 trades with fixed rules','My journal logs bias, sweep, confirmation, continuation, entry, stop, targets and R result','My risk per trade is fixed and between 1% and 3%','I follow the plan on 20 consecutive trades without breaking a rule'];
+WID.mastery=el=>{
+  el.innerHTML=`<div class="wid-h">Mastery gates<span>Saved in this browser</span></div><div class="wid-b"><div id="msL"></div><div class="read" id="msR"></div></div>`;
+  const draw=()=>{const st=S.chk.mast||{};$('#msL',el).innerHTML=MAST.map((g,i)=>`<label class="chk"><input type="checkbox" data-i="${i}" ${st[i]?'checked':''}><span>${g}</span></label>`).join('');const n=MAST.filter((g,i)=>st[i]).length;
+    $('#msR',el).innerHTML=`<b>${n} of ${MAST.length} gates passed.</b> ${n===MAST.length?'You have the process in place. Now consider live trading with minimum size.':'Do not move to live money until every gate is ticked honestly.'}`;
+    $$('input',el).forEach(x=>x.addEventListener('change',()=>{S.chk.mast=S.chk.mast||{};S.chk.mast[x.dataset.i]=x.checked;save();draw()}))};draw()};
+PAGES.push({id:'m16',part:'V',n:16,title:'Practice Plan & Mastery',min:16,level:'Capstone',src:'Original synthesis of the whole series',
+lead:'Everything so far is knowledge. This final module turns it into a schedule, a journal and a set of gates that tell you when you are actually ready to risk money.',
+goals:['Follow a 12-week training plan that builds skill in the right order','Journal every trade with the fields that reveal your mistakes','Compute expectancy from your own record','Know the gates to pass before trading live'],
+html:`
+<h2>A 12-week plan</h2>
+${tbl(['Weeks','Focus','Daily work','Output'],[['1','Chart reading and structure','Mark swings and trends on 3 time frames','50 marked charts'],['2','Liquidity and sessions','Mark session, previous day, equal and stacked levels','20 days of level maps'],['3','BOS, FVG, inverse FVG','Find 5 examples of each per day','100 labelled examples'],['4','Equilibrium, imbalances, SMT','Draw EQ correctly. Spot gaps and SMT','Rulebook of your own'],['5-6','Bias routine','Write a bias before every open, grade it after','40 bias records'],['7-10','Backtest the full chain','Replay mornings 09:30 to 10:30, take every valid setup','100+ simulated trades'],['11','Review','Analyse expectancy, biggest losses, rule breaks','Revised checklist'],['12','Simulator forward test','Trade the plan on a simulator in real time','20 clean days']])}
+<h2>The journal that makes you better</h2>
+<p>A journal is the only way to separate luck from skill. For every trade record, with screenshots:</p>
+${tbl(['Field','Why it matters'],[['Date, time, instrument','Check performance by time window'],['Bias and why','Tests your reading of the higher time frame'],['What was swept','Confirms the opportunity existed'],['Confirmation used (BOS or IFVG)','See which works for you'],['Continuation used (FVG or EQ)','Same'],['Entry, stop, targets','Rebuild R'],['Result in R and dollars','R makes trades comparable'],['Rule broken? (yes/no, which)','Quantifies discipline'],['Emotion before and after','Reveals psychology patterns']])}
+${W_('expect')}
+<h2>Rules for backtesting</h2>
+<ul><li>Decide the rules <em>before</em> looking at the chart. Do not adjust them to fit trades you already saw.</li><li>Use a replay tool so you cannot see the future.</li><li>Log every valid setup, including the ones you would have been scared to take.</li><li>Use at least 100 trades before judging. Fewer is anecdote.</li><li>Risk the same R on each trade so results compare.</li></ul>
+<h2>Mastery gates</h2>
+${W_('mastery')}
+<h2>A closing thought from the lesson</h2>
+<p>There is no secret ingredient being held back. Information is the cheap part. What separates people is the number of hours spent on the charts, the honesty of the review, and the willingness to follow a plan when it feels uncomfortable. Start small, stay consistent, protect your capital, and let the repetitions accumulate.</p>`,
+recap:['Train in order: chart reading, liquidity, confirmation, continuation, bias, backtest, simulator.','Journal everything, in R. Review rule breaks first.','Judge results over 100+ trades.','Pass all mastery gates before live money.']});
+QZ.m16=[
+{q:'What is the minimum useful sample size for judging a backtest?',o:['5 trades','20 trades','About 100 trades','It does not matter'],a:2,w:'Smaller samples are dominated by luck.'},
+{q:'Why measure results in R?',o:['It sounds professional','It makes trades of different dollar size comparable','It avoids losses','Brokers require it'],a:1,w:'R expresses outcomes in units of risk.'},
+{q:'You adjust your rules after seeing several backtest trades play out. What is the problem?',o:['None','Hindsight bias: rules must be fixed before testing','You need more indicators','You should use bigger size'],a:1,w:'Fitting rules to known outcomes inflates results.'}];
+
+/* ================= REFERENCE PAGES ================= */
+const GLOSS=[['Asia / London / New York session','Three regional trading windows (ET): 18:00-03:00, 03:00-08:30, 08:30 pre-market and 09:30-17:00. Each can leave a high and low that act as liquidity.'],['Bias (daily bias)','The expected direction of delivery for the session, from higher time frame trend, liquidity and continuation tools.'],['BOS (break of structure)','A candle close beyond the most recent swing of the trend, showing structure has shifted.'],['BPR (balanced price range)','A zone crossed swiftly in one direction and then swiftly back, leaving it thin on both sides.'],['Buy-side liquidity','Buy orders resting above highs: stops of shorts plus breakout buyers.'],['Confirmation confluence','A tool that shows orders were filled: BOS, inverse FVG.'],['Continuation confluence','A tool that shows a new trend will keep going: FVG, equilibrium.'],['Counterparty','The trader on the other side of an order. Large players need many.'],['Discount','The half of a range below equilibrium. Favourable for longs in an uptrend.'],['Draw on liquidity (DOL)','A level price is likely to reach for because many orders rest there.'],['Drawdown','A decline from an equity peak. Prop firms define maximum drawdown rules.'],['EQ (equilibrium)','The 50% level of the most recent swing range.'],['Equal highs / lows','Two highs or lows at nearly the same price, holding doubled orders.'],['External liquidity','Swing highs and lows outside the current range.'],['FVG (fair value gap)','Three-candle imbalance where wicks of candles 1 and 3 do not overlap.'],['FOMC / CPI / PPI','Scheduled US economic events that create volatile candles.'],['Imbalance','A price range where trading was one-sided and lightly traded.'],['Internal liquidity','Imbalances and equilibrium inside the current range.'],['Inverse FVG (IFVG)','A fair value gap that a candle body closes through, flipping its role.'],['Leader / laggard','In SMT, the index that diverges first and the one that follows.'],['Liquidity','Resting orders: buy/sell stops and limits.'],['Liquidity sweep','A push through a high or low that triggers resting orders.'],['Low resistance liquidity','Several untouched highs or lows stacked in a row.'],['Market structure','The sequence of swing highs and lows defining a trend.'],['NDOG / NWOG','New day / new week opening gaps.'],['NQ / ES','E-mini Nasdaq-100 and E-mini S&P 500 futures.'],['Premium','The half of a range above equilibrium. Expensive for longs, a sell zone in downtrends.'],['Prop firm','Company that sells evaluations and funds traders who pass.'],['R (R multiple)','Profit or loss measured in units of initial risk.'],['Relative equal highs / lows','Highs or lows within a few ticks of each other.'],['Reward-to-risk','Target distance divided by stop distance.'],['SMT divergence','ES and NQ disagreeing at a level, as one makes a new extreme and the other does not.'],['Sell-side liquidity','Sell orders resting below lows.'],['Spread hour','17:00-18:00 ET, thin market, wide spreads on some brokers.'],['Swing high / swing low','A peak or trough with lower highs or higher lows on both sides.'],['Tick','Minimum price increment: 0.25 points on ES and NQ.'],['Wick','The thin line showing the extreme of a candle beyond its body.']];
+PAGES.push({id:'cheat',part:'T',title:'Cheat Sheet',raw:1,html:`<div class="eyebrow">Reference</div><h1>One-page cheat sheet</h1><p class="lead">Everything you need during a review session. Times are Eastern.</p>
+<h2>Candle-close rules</h2>${tbl(['Concept','Rule'],[['Break of structure','Candle CLOSE beyond the most recent swing in the trend. Wick = no break.'],['Fair value gap','Wicks of candle 1 and candle 3 do not overlap. Colour is irrelevant.'],['FVG disrespect','Candle CLOSE beyond the far side of the gap.'],['Inverse FVG','A disrespected gap. In a stack use the farthest gap.'],['Equilibrium','50% of MOST RECENT low-to-high (or high-to-low). Never older swings.']])}
+<h2>Time</h2>${tbl(['Window','Meaning'],[['18:00-03:00','Asia'],['03:00-08:30','London'],['08:30-09:30','NY pre-market (data at 8:30)'],['09:30-09:50','Manipulation window'],['09:50-10:10','Entry window'],['10:30','No trade by now? Stop'],['17:00-18:00','Spread hour, no trading']])}
+<h2>Tool roles</h2>${tbl(['Job','Tools'],[['Opportunity','Sessions, previous day, stacked, equal, news highs/lows'],['Confirmation','BOS, inverse FVG'],['Continuation','FVG, equilibrium'],['Exits','The next higher time frame draw on liquidity']])}
+<h2>Trade flow</h2>${steps([['Bias','HTF trend','4H and 1H structure, draws, gaps, EQ'],['Wait','Sweep','Let New York take a level first'],['Confirm','5m BOS / IFVG','Prefer the leading index'],['Continue','FVG or EQ tap','Wait for the reaction, drop to 1m'],['Exit','TP1 to TP3','At real draws on liquidity']])}
+<h2>Risk</h2>${tbl(['Rule','Value'],[['Risk per trade','1% to 3%. Never 5%, 10%, 20%'],['Contracts','Fixed per instrument, calibrated to largest typical stop (about 35 ticks) at ~3-4%'],['Halve size','Unusually wide stop or high-impact news'],['Funded phase','Reduce size once payouts are possible'],['ES / NQ tick value','$12.50 / $5.00 (0.25 pt tick). Micros: $1.25 / $0.50']])}
+<p class="disc">Educational material only. Not financial advice.</p>`});
+PAGES.push({id:'glossary',part:'T',title:'Glossary',raw:1,html:`<div class="eyebrow">Reference</div><h1>Glossary</h1><p class="lead">${GLOSS.length} terms from the course.</p><dl class="gl">${GLOSS.map(g=>`<dt>${g[0]}</dt><dd>${g[1]}</dd>`).join('')}</dl>`});
+QZ.exam=[
+{q:'Which statement defines day trading in this course?',o:['Maximising daily profit','Predicting where price goes with high probability on a daily basis','Using indicators to find entries','Holding trades for weeks'],a:1,w:'Module 1.'},
+{q:'Where does buy-side liquidity rest?',o:['Below lows','Above highs','At the 50% level','Inside gaps'],a:1,w:'Module 3: stops of shorts plus breakout buyers sit above highs.'},
+{q:'London session in ET:',o:['18:00-03:00','03:00-08:30','08:30-09:30','09:30-17:00'],a:1,w:'Module 4.'},
+{q:'In an uptrend you wait for a candle to close below the:',o:['Most recent swing low','Oldest swing low','Last swing high','EQ line'],a:0,w:'Module 5: monitor the latest low.'},
+{q:'A wick pokes below the most recent low but the candle closes above. This is:',o:['A BOS','Likely a sweep, structure intact','An inverse FVG','A BPR'],a:1,w:'Module 5.'},
+{q:'In a bullish FVG:',o:['High of candle 1 < low of candle 3','Low of candle 1 > high of candle 3','The wicks overlap','The colour of candle 1 matters'],a:0,w:'Module 6.'},
+{q:'After price taps an FVG and makes a new high, you should:',o:['Keep the gap for next week','Delete the used gaps','Double size','Trade the opposite'],a:1,w:'Module 6.'},
+{q:'Which gap is nearly useless?',o:['Weekend gap','New day gap','Candle-to-candle gap','FVG'],a:2,w:'Module 7.'},
+{q:'A BPR is:',o:['Two equal highs','A swift move through imbalance followed by a swift move back','A news event','A time window'],a:1,w:'Module 7.'},
+{q:'An inverse FVG is classified as:',o:['Reversal','Confirmation','Continuation','Exit'],a:1,w:'Module 8.'},
+{q:'For a stack of bullish gaps in an uptrend, which one must invert?',o:['The top','The lowest','Any','None'],a:1,w:'Module 8.'},
+{q:'Equilibrium in an uptrend is drawn from:',o:['Most recent low to most recent high','Oldest low to newest high','Open to close','Daily open to high'],a:0,w:'Module 9.'},
+{q:'In a downtrend you look to sell in:',o:['Discount','Premium','Anywhere','Never'],a:1,w:'Module 9.'},
+{q:'ES lower high, NQ higher high at a major high is:',o:['Bullish SMT','Bearish SMT','Neutral','A BOS'],a:1,w:'Module 10.'},
+{q:'The ideal entry window in New York is:',o:['09:30-09:50','09:50-10:10','11:00-12:00','13:00-14:00'],a:1,w:'Module 11.'},
+{q:'The step after bias and before entry is:',o:['Wait for a sweep and lower time frame confirmation','Enter at the open','Add size','Remove the stop'],a:0,w:'Modules 12 and 15.'},
+{q:'Recommended risk per trade:',o:['0.01%','1% to 3%','5% to 10%','20%'],a:1,w:'Module 13.'},
+{q:'A strategy with a 1:2 reward-to-risk breaks even at roughly:',o:['25%','33%','50%','66%'],a:1,w:'1/(1+2) = 33%.'},
+{q:'The funded phase of a prop account calls for:',o:['More risk','Less risk ("pull on the reins")','Switching assets','No stops'],a:1,w:'Module 14.'},
+{q:'Which is true of the instructor\'s strategy walkthrough?',o:['It is a rigid 10-step list','It is a way of thinking that leaves room for discretion','It uses only indicators','It ignores risk'],a:1,w:'Module 15.'}];
+PAGES.push({id:'exam',part:'T',title:'Final Exam',raw:1,get html(){return`<div class="eyebrow">Assessment</div><h1>Final exam</h1><p class="lead">${QZ.exam.length} questions covering the whole course. Answer each one; you see the explanation immediately. Aim for at least 85%.</p>${quizHTML('exam',QZ.exam,'Final exam')}`}});
+PAGES.unshift({id:'welcome',part:'',title:'Welcome',raw:1,get html(){return`<div class="eyebrow">Visual study course &middot; 16 modules</div><h1>Trade the orders, not the lines.</h1>
+<p class="lead">A desktop course in futures day trading, built around one idea: price moves to where orders are waiting. You will learn to find those orders, judge whether they were filled, and plan an entry, a stop and targets, with more than thirty charts and a set of tools you can play with.</p>
+<div class="chips"><span class="chip">${modules().length} modules</span><span class="chip">Charts in every lesson</span><span class="chip">Quizzes + final exam</span><span class="chip">Calculators + simulators</span></div>
+${F('pillars','The course is organised around these three pillars. The first twelve modules build the strategy, and then risk and psychology get a full module each.','Course structure')}
+<h2>Course map</h2><div class="cards">${modules().map(m=>`<a class="card" href="#${m.id}" data-go="${m.id}"><small>Module ${m.n} &middot; ${m.min} min</small><b>${m.title}</b><span>${m.lead.split('. ')[0]}.</span></a>`).join('')}</div>
+<h2>How to use it</h2>
+<ul><li>Work through the modules in order. Each builds on the one before.</li><li>Use the sliders and selectors. They show the rule, not only describe it.</li><li>Do the checkpoint quiz at the end of each module, then mark it complete.</li><li>Use the left and right arrow keys to move between modules.</li><li>Do the homework on a real chart. Reading is not practice.</li></ul>
+<div class="box key"><b>Where this came from</b><p>This course is an independent study guide written from notes on a public YouTube playlist, "Path to Profitability", presented by TJR. It is not made by or affiliated with the presenter. Figures, rules and times are as stated in those lessons and may change. Chart illustrations are schematic, drawn to explain a concept, not recordings of real trades.</p></div>
+<div class="box warn"><b>Risk warning</b><p>Trading futures and other leveraged products involves substantial risk of loss. Most day traders lose money. Nothing here is financial advice. Practise on a simulator and never risk money you cannot afford to lose.</p></div>
+<div class="pager"><span></span><button class="btn liq" data-go="m01">Begin Module 1 &rarr;</button></div>`}});
+</script>
+<script>
+refreshNav();route();
+</script>
+</body></html>
